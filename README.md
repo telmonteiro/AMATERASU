@@ -25,3 +25,10 @@ Future upgrades:
 - Code more organized and some more functionalities (similar to ACTIN, e.g. line plots, more user friendly, etc).
 - Include option to convert the wavelength to RV space.
 - Improve interpolation method.
+
+## Running AMATERASU
+
+- To run AMATERASU, make sure to have the packages needed downloaded. The Python version used to build AMATERASU was 3.10.12, ran inside WSL Ubuntu with VsCode.
+- Then, in the directory of AMATERASU, the user runs
+
+sudo python setup.py install
