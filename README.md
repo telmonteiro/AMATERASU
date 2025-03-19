@@ -4,9 +4,9 @@ AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) i
 
 ## How does AMATERASU work?
 
-AMATERASU computes the equivalent width (EW) of a spectral line in a normalization independent way, by using the 90th percentile of the flux in a given window as the continuum level. It computes the EW for an array of bandpasses, going from 0.1 Å up to a user defined width.
+AMATERASU computes the equivalent width (EW) of a spectral line in a normalization independent way, by using the 90th percentile of the flux in a given window as the continuum level. It computes the EW for an array of bandpasses, going from 0.1 $\AA$ up to a user defined width.
 
-This way, the input includes the spectral line center, bandpass width and a window that includes both the line and some continuum. By default, the flux is interpolated inside the window, with a step similar to the original spectrum's step.
+This way, the input includes the spectral line center, bandpass width and a window that includes both the line and some continuum. By default, the flux is interpolated inside the window, with a step similar to the original spectrum's step. The maximum bandpass and the interpolation window can be given manually or automatically. Automatically, the spectra are coadded and then the code uses the find_peaks function of scipy to find spectral lines in a given order and then retrieves the FWHM of the closest line to be studied (threshold of 0.1 A). The bandpass window is a multiple (rounded) of the FWHM retrieved (by default 4 times) and the interpolation window is double that (8 times the FWHM).
 
 Having retrieved a time series of EWs measurements for a given bandpass, AMATERASU cleans the data by 3-sigma sequential clipping and binning the data by night. 
 
@@ -18,13 +18,18 @@ The user can choose one of the predefined indices in the ``ind_table.csv`` table
 
 Caveats:
 - AMATERASU was tested using NIRPS spectra only, so the predefined indices are NIR lines.
-- AMATERASU was only tested with spectral lines that were more or less simmetrical and with a decent depth, so spectral lines like He I 10830 Å or Paschen $\beta$ were not considered.
-- The interpolation included seems to behave weirdly for narrow bandpasses. For example, with a narrow bandpass and ACTIN I could detect Proxima's rotation period, but this is hardly the case in AMATERASU (for K I (c), the rotation period was detected with bandpasses of 0.3 Å and above). The interpolation method is basically the same as the "new" method in ACTIN2, and not the "true" method.
+- AMATERASU was only tested with spectral lines that were more or less simmetrical and with a decent depth, so spectral lines like He I 10830 $\AA$ or Paschen $\beta$ were not considered.
+- For now, only accepts 2D spectra.
 
 Future upgrades:
 - Code more organized and some more functionalities (similar to ACTIN, e.g. line plots, more user friendly, etc).
 - Include option to convert the wavelength to RV space.
-- Improve interpolation method.
+- Accept a list of input periods and a list of lines to analyse.
+- Accept 1D spectra.
+- Output options:
+    - Standard: warns if some input period was detect, in which line and with which FAP.
+    - Full: saves all analysis data in a directory for example.
+- Option to include a known activity indice to compute correlations in function of central bandpass and return bandpass that maximizes correlation (positive or negative).
 
 ## Running AMATERASU
 
