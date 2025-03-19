@@ -1,92 +1,7 @@
-# This file contains several useful functions that may be changed or rearranged later.
-
-import numpy as np, os, re
+import numpy as np
 import matplotlib.pylab as plt
-from collections import defaultdict
 
-def extract_date(file_path):
-    match = re.search(r"/(\d{4}-\d{2}-\d{2})/", file_path)
-    if match:
-        return match.group(1)
-    return None
-
-def gather_spectra(star_name, instrument, type="2d"):
-    '''
-    Extracts the paths to the spectra files for each instrument, as well as the dates of the observations (name of the folder).
-
-    Args:
-        star_name (str): identifier of the star
-        instrument (str): identifier of the instrument
-
-    Returns:
-        observations_dates (dict): dates of the observations
-        files_instrument (list): paths of the spectra to be used
-    '''
-    base_dir = f'/mnt/e/2024_NIRPS_project/{star_name}/{instrument}_DRS/'
-    date_folders = []; spectra_files = []
-
-    for root, dirs, files in os.walk(base_dir): #traverse the directory tree
-        for dir_name in dirs: #if the directory contains date folders (assuming they contain year-month-day format)
-            date_folders.append(os.path.join(root, dir_name))
-        
-        for file_name in files: #collect the spectra files within each date folder
-            if file_name.endswith(('.fits')):
-                spectra_files.append(os.path.join(root, file_name))
-
-    if instrument == "HARPS":
-        if type == "1d": type_list = ["S1D","s1d"]
-        else: type_list = ["S2D", "e2ds"]
-
-        date_grouped_files = defaultdict(list)
-        # Group files by date
-        for spec in spectra_files:
-            date = extract_date(spec)
-            if date and "._" not in spec:
-                date_grouped_files[date].append(spec)
-
-        files_instrument = []
-        for date, files in date_grouped_files.items():
-            # Prioritize S2D_A over e2ds_A
-            s2d_file = next((f for f in files if f.endswith(f'_{type_list[0]}_A.fits')), None)
-            e2ds_file = next((f for f in files if f.endswith(f'_{type_list[1]}_A.fits')), None)
-
-            if s2d_file:
-                files_instrument.append(s2d_file)
-            elif e2ds_file:
-                files_instrument.append(e2ds_file)
-
-    else:
-        if type == "1d": type_list = ["S1D"]
-        else: type_list = ["S2D"]
-        files_instrument = [spec for spec in spectra_files if spec.endswith(f'_{type_list[0]}_TELL_CORR_A.fits') and "_r." not in spec]
-
-    observations_dates = {extract_date(file) for file in files_instrument if extract_date(file)}
-
-    return observations_dates, files_instrument
-
-####################################################################
-
-def read_headers(hdr, headers, data=None, verb=False, verbose=True):
-    """Read fits header data using 'headers' dictionary.
-    Result is included in 'data' dictionary if not 'None'. If 'None' a new dictionary is returned"""
-    if not data:
-        data = {}
-
-    for key, hdr_id in zip(headers.keys(), headers.values()):
-        try:
-            if key == "rv_err" and hdr["OBJECT"] in ["GJ406","GJ643","GJ3737"]:
-                data[key] = hdr[hdr_id]/1e3
-            else:
-                data[key] = hdr[hdr_id]
-        except KeyError:
-            if verbose == True:
-                print(f"Header {key} not in fits file", verb)
-            data[key] = None
-    return data
-
-####################################################################
-
-def bin_data(x, y, err=None, bsize=1, stats="median", n_vals=2, estats="quad", show_plot=False):
+def bin_data(x, y, err=None, bsize=1, show_plot=False):
     """Bin time series data.
 
     Args:
@@ -135,13 +50,6 @@ def bin_data(x, y, err=None, bsize=1, stats="median", n_vals=2, estats="quad", s
     y_stat = np.zeros_like(bins)
     y_stat_err = np.zeros_like(bins)
 
-    def calc_mean(x, err):
-        if err.any():
-            x_stat = np.average(x, weights=1/err**2)
-        else:
-            x_stat = np.average(x)
-        return x_stat
-
     for i in range(bins.size):
         mask = (x >= bins[i]) & (x < bins[i] + bsize)
 
@@ -152,37 +60,12 @@ def bin_data(x, y, err=None, bsize=1, stats="median", n_vals=2, estats="quad", s
             y_stat_err[i] = np.nan
             continue
 
-        if stats == "mean":
-            x_stat[i] = calc_mean(x[mask], err[mask])
-            y_stat[i] = calc_mean(y[mask], err[mask])
-        elif stats == "median":
-            x_stat[i] = np.median(x[mask])
-            y_stat[i] = np.median(y[mask])
-        elif stats == "std":
-            x_stat[i] = np.average(x[mask])
-            y_stat[i] = np.std(y[mask])
-        elif stats == "min":
-            indices = y[mask].argsort()
-            x_stat[i] = np.average(x[mask][indices][:n_vals])
-            sorted_y = y[mask][y[mask].argsort()][:n_vals]
-            y_stat[i] = np.average(sorted_y)
-        elif stats == "max":
-            indices = y[mask].argsort()
-            x_stat[i] = np.average(x[mask][indices][-n_vals:])
-            sorted_y = y[mask][y[mask].argsort()][-n_vals:]
-            y_stat[i] = np.average(sorted_y)
-        else:
-            raise Exception("*** Error: 'stats' needs to be one of: 'mean', 'median', 'std', 'min', 'max'.")
+        x_stat[i] = np.median(x[mask])
+        y_stat[i] = np.median(y[mask])
 
-        if estats == "quad":
-            # quadratically added errors
-            y_stat_err[i] = np.sqrt(np.sum(err[mask]**2))/y[mask].size
-        elif estats == "SEM":
-            # standard error on the mean
-            y_stat_err[i] = np.std(y[mask])/np.sqrt(y[mask].size)
-        else:
-            raise Exception("*** Error: 'estats' needs to be one of: 'quad', 'SEM'.")
-
+        # quadratically added errors
+        y_stat_err[i] = np.sqrt(np.sum(err[mask]**2))/y[mask].size
+    
     remove_nan = (~np.isnan(x_stat))
     x_stat = x_stat[remove_nan]
     y_stat = y_stat[remove_nan]
