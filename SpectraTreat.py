@@ -24,26 +24,33 @@ class SpectraTreat:
         
         ln_ctr = indice_info["ln_ctr"]
 
-        spectra_obs = []
-        for n in range(spectra_observations.shape[0]): #N_observations
-            orders = []
-            min_dist = []
-            for i in range(spectra_observations.shape[2]): #N_orders
-                wave = spectra_observations[n,0,i,:]
-                if ln_ctr > wave[0] and ln_ctr < wave[-1]:
-                    orders.append(i)
-                    dist = ((ln_ctr - wave[0], wave[-1] - ln_ctr))
-                    min_dist.append(np.min(dist))
+        if len(spectra_observations.shape) == 4:
+            spectra_obs = []
+            for n in range(spectra_observations.shape[0]): #N_observations
+                orders = []
+                min_dist = []
+                for i in range(spectra_observations.shape[2]): #N_orders
+                    wave = spectra_observations[n,0,i,:]
+                    if ln_ctr > wave[0] and ln_ctr < wave[-1]:
+                        orders.append(i)
+                        dist = ((ln_ctr - wave[0], wave[-1] - ln_ctr))
+                        min_dist.append(np.min(dist))
 
-            spec_order = orders[np.argmax(min_dist)]
-            spectra_obs.append(spectra_observations[n,:,spec_order,:])
+                spec_order = orders[np.argmax(min_dist)]
+                spectra_obs.append(spectra_observations[n,:,spec_order,:])
 
-        spectra_obs = np.array(spectra_obs, dtype=object) #N_obs, spectrum
+            spectra_obs = np.array(spectra_obs, dtype=object) #N_obs, spectrum
+
+        else:
+            spectra_obs = np.array(spectra_observations, dtype=object)
 
         if automatic_windows:
             #coadd, find_peaks, define windows
-            wave_grid = self._wavelength_2D_grid(spectra_obs)
-            wave_coadd, flux_coadd = self._coadd_spectra_s2d(spectra_obs, wave_grid)
+            if len(spectra_observations.shape) == 4:
+                wave_grid = self._wavelength_2D_grid(spectra_obs)
+                wave_coadd, flux_coadd = self._coadd_spectra_s2d(spectra_obs, wave_grid)
+            else:
+                wave_coadd, flux_coadd = self._coadd_spectra_s1d(spectra_obs)
 
             inverted_flux = -flux_coadd
             # Find peaks in the inverted flux
@@ -86,9 +93,7 @@ class SpectraTreat:
         return wave_grid
     
     def _coadd_spectra_s2d(self, spectra_obs, wave_grid):
-
         new_disp_grid = np.arange(wave_grid[1], wave_grid[2], wave_grid[0]) * u.AA
-
         new_spec = Spectrum1D(spectral_axis=new_disp_grid, flux=np.zeros_like(new_disp_grid / u.AA) * u.electron)
 
         for i in range(spectra_obs.shape[0]):
@@ -100,6 +105,30 @@ class SpectraTreat:
 
             wave = wave * u.AA
             flux = flux * u.electron
+
+            input_spec = Spectrum1D(spectral_axis=wave, flux=flux)
+            spline = SplineInterpolatedResampler()
+            new_spec_sp = spline(input_spec, new_disp_grid)
+            new_spec += new_spec_sp
+
+        return new_spec.wavelength.value, new_spec.flux.value
+    
+    def _coadd_spectra_s1d(self, spectra_obs):
+        #using the first spectrum has the common reference grid
+        wave_0 = spectra_obs[0,0,:]
+        delta_lambda = np.median(np.diff(wave_0))
+        new_disp_grid = np.arange(np.min(wave_0)+10, np.max(wave_0)-10, delta_lambda) * u.AA
+        new_spec = Spectrum1D(spectral_axis=new_disp_grid, flux=np.zeros_like(new_disp_grid / u.AA) * u.dimensionless_unscaled)
+
+        for i in range(spectra_obs.shape[0]):
+
+            wave = np.array(spectra_obs[i,0,:], dtype=float)
+            flux = np.array(spectra_obs[i,1,:], dtype=float)
+            flux[np.isnan(flux)] = 0
+            flux[flux <= 0] = 1  # Replace non-positive flux with 1
+
+            wave = wave * u.AA
+            flux = flux * u.dimensionless_unscaled
 
             input_spec = Spectrum1D(spectral_axis=wave, flux=flux)
             spline = SplineInterpolatedResampler()
