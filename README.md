@@ -14,21 +14,18 @@ Finally, AMATERASU runs GLS periodograms (with a bunch of technicalities) and if
 
 The user can choose one of the predefined indices in the ``ind_table.csv`` table or define a new indice.
 
+AMATERASU accepts both 1D and 2D spectra. Accepts lists of input periods and list of lines to analyse.
+
+Option for "standard" or "full" outputs. "Standard" only prints and saves a dataframe with the bandpasses where the input periods are detected. "Full" saves all analysis data in a directory.
+
 ## Caveats and future upgrades
 
 Caveats:
 - AMATERASU was tested using NIRPS spectra only, so the predefined indices are NIR lines.
 - AMATERASU was only tested with spectral lines that were more or less simmetrical and with a decent depth, so spectral lines like He I 10830 $\AA$ or Paschen $\beta$ were not considered.
-- For now, only accepts 2D spectra.
 
 Future upgrades:
-- Code more organized and some more functionalities (similar to ACTIN, e.g. line plots, more user friendly, etc).
 - Include option to convert the wavelength to RV space.
-- Accept a list of input periods and a list of lines to analyse.
-- Accept 1D spectra.
-- Output options:
-    - Standard: warns if some input period was detect, in which line and with which FAP.
-    - Full: saves all analysis data in a directory for example.
 - Option to include a known activity indice to compute correlations in function of central bandpass and return bandpass that maximizes correlation (positive or negative).
 
 ## Running AMATERASU
