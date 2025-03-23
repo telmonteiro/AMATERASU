@@ -6,7 +6,7 @@ AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) i
 
 ## How does AMATERASU work?
 
-AMATERASU computes the equivalent width (EW) of a spectral line in a normalization independent way, by using the 90th percentile of the flux in a given window as the continuum level. It computes the EW for an array of bandpasses, going from 0.1 $\AA$ up to a user defined width.
+AMATERASU computes the equivalent width (EW) of a spectral line in a normalization independent way, by using the 90th percentile of the flux in a given window as the continuum level. It computes the EW for an array of bandpasses, going from 0.1 A up to a user defined width.
 
 This way, the input includes the spectral line center, bandpass width and a window that includes both the line and some continuum. By default, the flux is interpolated inside the window, with a step similar to the original spectrum's step. The maximum bandpass and the interpolation window can be given manually or automatically. Automatically, the spectra are coadded and then the code uses the find_peaks function of scipy to find spectral lines in a given order and then retrieves the FWHM of the closest line to be studied (threshold of 0.1 A). The bandpass window is a multiple (rounded) of the FWHM retrieved (by default 4 times) and the interpolation window is triple that (12 times the FWHM).
 
@@ -29,7 +29,7 @@ Output options:
 
 Caveats:
 - AMATERASU was tested using NIRPS spectra only, so the predefined indices are NIR lines.
-- AMATERASU was only tested with spectral lines that were more or less simmetrical and with a decent depth, so spectral lines like He I 10830 $\AA$ or Paschen $\beta$ were not considered.
+- AMATERASU was only tested with spectral lines that were more or less simmetrical and with a decent depth, so spectral lines like He I 10830 A or Paschen $\beta$ were not considered.
 - Interp_win should be big enough to not include flux from the line. If not calibrated the signal detected through GLSPs can be degraded and starts raising the year/2 signal.
 
 Future upgrades:
