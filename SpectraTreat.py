@@ -1,12 +1,13 @@
-import pandas as pd, numpy as np # type: ignore
-from specutils.manipulation import SplineInterpolatedResampler #type: ignore
-from specutils import Spectrum1D #type: ignore
-import astropy.units as u #type: ignore
+import pandas as pd
+import matplotlib.pyplot as plt
+import gc
+import numpy as np
+from specutils import Spectrum1D, manipulation 
+import astropy.units as u
 from scipy.signal import find_peaks
 
 class SpectraTreat:
     """Given an array of 1D or 2D spectra, finds the spectral order of the line (in the case of 2D spectra) and defines the bandpass and interpolation windows.
-
     Args:
         spectra_observations (numpy array): array of spectral data with format (N_spectra, N_axis, N_orders, N_pixels). N_axis = 3 (wavelength, flux and flux error) and N_orders = 1 in case of 1D spectra.
         indice (str): identifier of indice / spectral line.
@@ -16,22 +17,31 @@ class SpectraTreat:
     Attributes:
         resuls (tuple): line center, bandpass window, interpolation window, compressed array of spectral data 
     """
-    def __init__(self, spectra_observations, indice, indice_info=None, automatic_windows={"ln_win_mult":4,"interp_win_mult":2}):
+    def __init__(self, spectra_observations, indice, indice_info=None, automatic_windows={"ln_win_mult":4,"interp_win_mult":3},plot_line=False):
         
         if indice_info == None:
             ind_table = pd.read_csv("ind_table.csv")
             indice_info = ind_table[ind_table["ln_id"]==indice].to_dict(orient='records')[0]
-        
+        else:
+            indice_info = indice_info[indice]
+
         ln_ctr = indice_info["ln_ctr"]
 
         if len(spectra_observations.shape) == 4:
+
             spectra_obs = []
+
             for n in range(spectra_observations.shape[0]): #N_observations
+
                 orders = []
                 min_dist = []
+
                 for i in range(spectra_observations.shape[2]): #N_orders
+
                     wave = spectra_observations[n,0,i,:]
+
                     if ln_ctr > wave[0] and ln_ctr < wave[-1]:
+
                         orders.append(i)
                         dist = ((ln_ctr - wave[0], wave[-1] - ln_ctr))
                         min_dist.append(np.min(dist))
@@ -45,16 +55,21 @@ class SpectraTreat:
             spectra_obs = np.array(spectra_observations, dtype=object)
 
         if automatic_windows:
+
             #coadd, find_peaks, define windows
             if len(spectra_observations.shape) == 4:
                 wave_grid = self._wavelength_2D_grid(spectra_obs)
                 wave_coadd, flux_coadd = self._coadd_spectra_s2d(spectra_obs, wave_grid)
             else:
                 wave_coadd, flux_coadd = self._coadd_spectra_s1d(spectra_obs)
+                wave_coadd = wave_coadd[(wave_coadd >= ln_ctr - 25) & (wave_coadd <= ln_ctr + 25)]
+                flux_coadd = flux_coadd[(wave_coadd >= ln_ctr - 25) & (wave_coadd <= ln_ctr + 25)]
 
             inverted_flux = -flux_coadd
+
             # Find peaks in the inverted flux
             peaks_indices, properties = find_peaks(inverted_flux, rel_height=0.5, width=1)
+
             # Extract the wavelengths and widths of the detected absorption lines
             lines_center = wave_coadd[peaks_indices]
             lines_fwhm = properties['widths'] * np.median(np.diff(wave_coadd))
@@ -63,8 +78,25 @@ class SpectraTreat:
                 if np.isclose(wavelength,ln_ctr,atol=0.1):
                     ln_fwhm = np.around(fwhm,5)
 
+            try:
+                ln_fwhm
+            except NameError:
+                raise Exception("Could not find a line near to ln_ctr input.")
+
             ln_win = np.around(automatic_windows["ln_win_mult"]*ln_fwhm,1)
-            interp_win = automatic_windows["interp_win_mult"]*ln_win
+            interp_win = np.around(automatic_windows["interp_win_mult"]*ln_win,1)
+
+            if plot_line:
+
+                plt.figure(figsize=(9, 3.5))
+                plt.title(f"{indice} coadded line")
+                plt.xlabel(r"$\lambda$ [Å]")
+                plt.ylabel("Flux")
+                mask_interp = (wave_coadd >= ln_ctr - interp_win/2) & (wave_coadd <= ln_ctr + interp_win/2)
+                plt.plot(wave_coadd[mask_interp], flux_coadd[mask_interp])
+                plt.axvspan(ln_ctr - ln_win / 2, ln_ctr + ln_win / 2, alpha=0.1, color='yellow', ec = "black", lw = 2)
+                plt.show()
+                gc.collect()
 
         else:
             ln_win, interp_win = indice_info["ln_win"], indice_info["interp_win"]
@@ -81,6 +113,7 @@ class SpectraTreat:
         lambda_max_values = []
 
         for i in range(spectra_obs.shape[0]):
+
             wave_order = spectra_obs[i,0,:]
             step_values.append(np.median(np.diff(wave_order)))
             lambda_min_values.append(np.min(wave_order))
@@ -92,7 +125,9 @@ class SpectraTreat:
 
         return wave_grid
     
+
     def _coadd_spectra_s2d(self, spectra_obs, wave_grid):
+
         new_disp_grid = np.arange(wave_grid[1], wave_grid[2], wave_grid[0]) * u.AA
         new_spec = Spectrum1D(spectral_axis=new_disp_grid, flux=np.zeros_like(new_disp_grid / u.AA) * u.electron)
 
@@ -100,6 +135,7 @@ class SpectraTreat:
 
             wave = np.array(spectra_obs[i,0,:], dtype=float)
             flux = np.array(spectra_obs[i,1,:], dtype=float)
+
             flux[np.isnan(flux)] = 0
             flux[flux <= 0] = 1  # Replace non-positive flux with 1
 
@@ -107,16 +143,19 @@ class SpectraTreat:
             flux = flux * u.electron
 
             input_spec = Spectrum1D(spectral_axis=wave, flux=flux)
-            spline = SplineInterpolatedResampler()
+            spline = manipulation.SplineInterpolatedResampler()
+
             new_spec_sp = spline(input_spec, new_disp_grid)
             new_spec += new_spec_sp
 
         return new_spec.wavelength.value, new_spec.flux.value
     
+
     def _coadd_spectra_s1d(self, spectra_obs):
         #using the first spectrum has the common reference grid
         wave_0 = spectra_obs[0,0,:]
         delta_lambda = np.median(np.diff(wave_0))
+
         new_disp_grid = np.arange(np.min(wave_0)+10, np.max(wave_0)-10, delta_lambda) * u.AA
         new_spec = Spectrum1D(spectral_axis=new_disp_grid, flux=np.zeros_like(new_disp_grid / u.AA) * u.dimensionless_unscaled)
 
@@ -131,7 +170,8 @@ class SpectraTreat:
             flux = flux * u.dimensionless_unscaled
 
             input_spec = Spectrum1D(spectral_axis=wave, flux=flux)
-            spline = SplineInterpolatedResampler()
+            spline = manipulation.SplineInterpolatedResampler()
+
             new_spec_sp = spline(input_spec, new_disp_grid)
             new_spec += new_spec_sp
 

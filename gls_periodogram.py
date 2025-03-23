@@ -1,11 +1,12 @@
-import numpy as np, gc, matplotlib.pylab as plt
+import numpy as np
+import gc
+import matplotlib.pylab as plt
 from matplotlib.lines import Line2D
 from astropy.timeseries import LombScargle
 from scipy.signal import find_peaks
 
 class gls_periodogram:
     """Generalised Lomb-Scargle Periodogram using the `astropy` implementation.
-    
     Args:
         star (str): Star ID.
         p_rot_lit (list): Literature rotation period and its error for comparison.
@@ -23,31 +24,38 @@ class gls_periodogram:
         dict: Dictionary containing periodogram results.
     """
     def __init__(self, star, period_test, ind, x, y, y_err, pmin=1.5, pmax=1e3, steps=5e3, folder_path=None):
+
         x = np.asarray(x)
         y = np.asarray(y)
         t = max(x) - min(x)
         n = len(x)
+
         results = {}
+
         #Compute the periodogram and window function.
         #Nyquist frequencies computation
         k1 = pmax/t;     fmin = 1./(k1 * t)
         k2 = pmin * n/t; fmax = n/(k2 * t)
         freq = np.linspace(fmin, fmax, int(steps))
         period = 1./freq
+
         #get power from GLS
         gls = LombScargle(x, y, y_err)
         power = gls.power(freq)
+
         #detect peaks
         peaks, _ = find_peaks(power)
         sorted_peak_indices = np.argsort(power[peaks])[::-1]  #sort in descending order of power
         sorted_peaks = peaks[sorted_peak_indices]
         peaks_power = power[sorted_peaks]
         peaks_period = period[sorted_peaks]
+
         #False alarm probabilities (FAP)
         fap_max_power = gls.false_alarm_probability(np.nanmax(power))
         faps = gls.false_alarm_probability(power)
         fap_levels = np.array([0.01, 0.001])
         fap1, fap01 = gls.false_alarm_level(fap_levels)
+
         results.update({'freq': freq,'period': period,'power': power,'fap_maxp': fap_max_power,'fap_01': fap01,'fap_1': fap1,'FAPS': faps})
 
         #Window function
@@ -71,10 +79,13 @@ class gls_periodogram:
         results.update({'gaps': gaps,'sel_peaks_period': sel_peaks_dict["sel_peaks_period"],'sel_peaks_power': sel_peaks_dict["sel_peaks_power"], "sel_peaks_FAP": sel_peaks_dict["sel_peaks_FAP"]})
 
         if len(sel_peaks_dict["sel_peaks_period"]) > 0:
+
             period_best = sel_peaks_dict["sel_peaks_period"][0]
             power_best = sel_peaks_dict["sel_peaks_power"][0]
             fap_best = sel_peaks_dict["sel_peaks_FAP"][0]
+
         else: #there is no significant peaks in the periodogram
+
             period_best = 0
             power_best = 0
             fap_best = 0
@@ -107,8 +118,11 @@ class gls_periodogram:
         # exclude peaks close to win peaks
         exc_peaks = []; exc_peaks_power = []
         for ind,peak in enumerate(sign_peaks):
+
             atol = peak * atol_frac
+
             for peak_win in sign_peaks_win:
+
                 if np.isclose(peak, peak_win, atol=atol):
                     exc_peaks.append(peak)
                     exc_peaks_power.append(ind)   
@@ -124,20 +138,26 @@ class gls_periodogram:
     def plot_periodogram(self, ind, star, period_test, results, period, power, sel_peaks, fap1, fap01, folder_path):
         """Generate and save the periodogram plot."""
         fig, axes = plt.subplots(figsize=(10, 4))
+
         axes.text(0.13, 0.89, f"{star} GLS {ind}", fontsize=12, transform=plt.gcf().transFigure)
         axes.set_xlabel("Period [d]")
         axes.set_ylabel("Normalized Power")
+
         axes.semilogx(period, power, 'k-')
 
         plevels = [fap1,fap01]
         fap_levels = np.array([0.01, 0.001])
+
         for i in range(len(fap_levels)):
             axes.plot([min(period), max(period)], [plevels[i]]*2, '--', label="FAP = %4.1f%%" % (fap_levels[i]*100))
 
-        if type(period_test[0]) != list: period_test = [period_test]
+        if type(period_test[0]) != list: 
+            period_test = [period_test]
+
         for p_rot_val in period_test:
             p_rot, p_rot_err = p_rot_val
             axes.axvspan(p_rot - p_rot_err, p_rot + p_rot_err, alpha=0.6, color="orange")
+
         for peak in sel_peaks:
             axes.axvline(peak, ls='--', lw=0.8, color='red')
 
@@ -157,17 +177,21 @@ class gls_periodogram:
         fig, axes = plt.subplots(figsize=(10, 4))
         axes.set_xlabel("Period [days]")
         axes.set_ylabel("Power")
+
         axes.semilogx(period, power_win, 'b-',label="WF")
         axes.semilogx(period, results["power"], 'r-',lw=0.7,label="data")
+
         axes.text(0.13, 0.89, f"{star} WF GLS {ind}", fontsize=12, transform=plt.gcf().transFigure)
 
         plevels = [fap1,fap01]
         fap_levels = np.array([0.01, 0.001])
+
         for i in range(len(fap_levels)):
             axes.plot([min(period), max(period)], [plevels[i]]*2, '--', label="FAP = %4.1f%%" % (fap_levels[i]*100))
 
         for gap in results["gaps"]:
             axes.axvline(gap, ls='--', lw=0.7, color='green')
+
         axes.legend(loc="best")
 
         plt.savefig(folder_path+f"periodograms/{star}_{ind}_GLS_WF.pdf", bbox_inches="tight")
@@ -175,35 +199,41 @@ class gls_periodogram:
         gc.collect()
 
     @staticmethod
-    def GLS_plot(star, ind, p_rot_lit_list, cols, df_clean, all_gls_df, folder):
-        nrows = len(cols)
+    def GLS_plot(star, ind, p_rot_lit_list, bandpasses, df_clean, all_gls_df, folder):
+
+        nrows = len(bandpasses)
         fig, axes = plt.subplots(nrows=nrows,ncols=2,figsize=(14, 0.5+nrows*2), sharex="col")
 
-        for i,col in enumerate(cols):
+        for i,bp in enumerate(bandpasses):
 
+            col = f"{ind}{int(round(bp*10,0)):02d}_EW"
             results = all_gls_df.iloc[i].to_dict()
 
             axes[i,0].errorbar(df_clean["BJD"] - 2450000, df_clean[col], df_clean[col+"_error"], fmt="k.")
-            axes[i,0].set_ylabel(rf"{col[:-3]} - EW [$\AA$]", fontsize=13)
-            if i == len(cols) - 1:
+            axes[i,0].set_ylabel(rf"EW - {int(round(bp*10,0)):02d} [$\AA$]", fontsize=13)
+
+            if i == len(bandpasses) - 1:
                 axes[i,0].set_xlabel("BJD $-$ 2450000 [d]", fontsize=13)
+
             axes[i,0].tick_params(axis="both", direction="in", top=True, right=True, which='both')
 
             axes[i,1].semilogx(results["period"], results["power"], "k-")
             axes[i,1].plot([min(results["period"]), max(results["period"])], [results["fap_01"]] * 2,"--",color="black",lw=0.7)
             axes[i,1].plot([min(results["period"]), max(results["period"])], [results["fap_1"]] * 2,"--",color="black",lw=0.7)
+
             axes[i,1].set_ylabel("Norm. Power", fontsize=13)
             axes[i,1].set_xlabel("Period [d]", fontsize=13)
             axes[i,1].tick_params(axis="both", direction="in", top=True, right=True, which='both')
 
-            if type(p_rot_lit_list[0]) != list: p_rot_lit_list = [p_rot_lit_list]
+            if type(p_rot_lit_list[0]) != list: 
+                p_rot_lit_list = [p_rot_lit_list]
+
             for p_rot_val in p_rot_lit_list:
                 p_rot, p_rot_err = p_rot_val
                 axes[i,1].axvspan(p_rot - p_rot_err, p_rot + p_rot_err, alpha=0.6, color="orange")
                 
-            axes[i,1].text(0.05, 0.9,f"P = {np.around(results['period_best'], 1)} d \nFAP = {results['fap_best']*100:.2e}%",
-                        fontsize=12,transform=axes[i,1].transAxes,verticalalignment="top")
+            axes[i,1].text(0.05, 0.9,f"P = {np.around(results['period_best'], 1)} d \nFAP = {results['fap_best']*100:.2e}%",fontsize=12,transform=axes[i,1].transAxes,verticalalignment="top")
 
         fig.subplots_adjust(hspace=0.0)
-        fig.text(0.13, 0.88, f"{star}", fontsize=17)
-        plt.savefig(folder+f"{star}_{ind}_GLS.pdf",dpi=1000, bbox_inches="tight")
+        fig.text(0.13, 0.881, f"{star} - {ind}", fontsize=17)
+        plt.savefig(folder+f"{star}_{ind}_GLS.pdf",dpi=2000, bbox_inches="tight")
