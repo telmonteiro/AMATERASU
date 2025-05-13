@@ -6,16 +6,16 @@ jobs:
     name: Paper Draft
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build draft PDF
-        uses: openjournals/openjournals-draft-action@master
+        uses: openjournals/openjournals-draft-action@v1.0.0
         with:
           journal: joss
           paper-path: paper.md
 
-      - name: Upload
-        uses: actions/upload-artifact@b416f3d673d360f4eebcc63edb4fb54b7f7c86b0
+      - name: Upload PDF
+        uses: actions/upload-artifact@v3
         with:
           name: paper
           path: paper.pdf
