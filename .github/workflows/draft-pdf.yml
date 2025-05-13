@@ -15,7 +15,7 @@ jobs:
           paper-path: paper.md
 
       - name: Upload
-        uses: actions/upload-artifact@v3.1.3
+        uses: actions/upload-artifact@b416f3d673d360f4eebcc63edb4fb54b7f7c86b0
         with:
           name: paper
           path: paper.pdf
