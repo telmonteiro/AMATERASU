@@ -32,7 +32,7 @@ bibliography: paper.bib
 
 # Summary
 
-AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a specific spectral line, the user can see if the input period may be correlated with activity. The aim of this program is to provide an easy and quick way to check for clues that the period observed in, for example, RV is of stellar origin. AMATERASU follows a methodology similar to [@GomesdaSilva:2025, accepted] and is inspired by ACTIN ([@GomesdaSilva:2018], [@GomesdaSilva:2021]).  
+AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a specific spectral line, the user can see if the input period may be correlated with activity. The aim of this program is to provide an easy and quick way to check for clues that the period observed in, for example, RV is of stellar origin. AMATERASU follows a methodology similar to @GomesdaSilva:2025 (accepted) and is inspired by ACTIN [@GomesdaSilva:2018], [@GomesdaSilva:2021].  
 
 # Statement of need
 
@@ -44,14 +44,14 @@ By combining flexible input formats, automatic window definition, and batch anal
 # Description
 
 AMATERASU computes the equivalent-width (EW) of a spectral line in a normalization independent way, by using the 90th percentile of the flux in a given window as the continuum level. It then computes the EW for an array of bandpasses, going from 0.1 \r{A} up to a user defined width.
-This way, the input includes the spectral line center, maximum bandpass width window and a window that includes both the line and some continuum flux. The flux is interpolated inside the window using the \texttt{specutils} packag, with a step similar to the original spectrum's step, to align the spectrum portion with the bandpass edges. 
+This way, the input includes the spectral line center, maximum bandpass width window and a window that includes both the line and some continuum flux. The flux is interpolated inside the window using the \texttt{specutils} package, with a step similar to the original spectrum's step, to align the spectrum portion with the bandpass edges. 
 
 The maximum bandpass and interpolation window can be given manually or automatically. In the automatic way, the spectra are coadded into a master spectrum, using the first spectrum as the common reference grid, which is then smoothed with a moving average. Then, the \texttt{find\_peaks} function from the \texttt{scipy} package is used to find the spectral lines and then retrieves the FWHM of the closest line to be studied (with a threshold of 0.1 \r{A}). The bandpass window is a multiple (rounded) of the FWHM retrieved (by default 5 times) and the interpolation window is triple that (15 times the FWHM). Having retrieved a time series of EWs measurements for a given bandpass, AMATERASU cleans the data by applying a 3-$\sigma$ sequential clipping and binning the data by night. 
 
 Finally, AMATERASU runs Generalized Lomb-Scargle (GLS) periodograms [@Zechmeister:2009] and extracts the significant peaks. These are the ones not close to peaks in the window function periodogram and with a false alarm probability (FAP) under the specified FAP threshold. If any of the significant peaks is close within the specified threshold to the input period, the program warns the user.
 
 The user can choose one of the predefined indices in the ``ind_table.csv`` table or test a new indice. 
-The tool accepts a list of input periods and a list of lines to analyse, as well as 1D or 2D spectra. To be more flexible with the instruments tested, the spectra have to be given in an array format: for 2D spectra, the array should have dimensions of ($N_\text{obs}$,$N_\text{spectrum axis}$,$N_\text{orders}$,$N_\text{pixels}$), where $N_\text{spectrum axis}$ refers for the wavelength, flux and flux error of the each spectrum. An array with the dates of observations in BJD is also needed.
+The tool accepts a list of input periods and a list of lines to analyse, as well as 1D or 2D spectra. To be more flexible with the instruments tested, the spectra have to be given in an array format: for 2D spectra, the array should have dimensions of ($N_\text{obs}$,$N_\text{spectrum axis}$,$N_\text{orders}$,$N_\text{pixels}$), where $N_\text{spectrum axis}$ refers for the wavelength, flux and flux error of each spectrum. An array with the dates of observations in BJD is also needed.
 
 Besides the GLS periodograms, AMATERASU can also compute the Spearman ranked correlation coefficient between all the central bandpasses and an input array, for example a known activity indice, like the CCF FWHM of the observations.
 
