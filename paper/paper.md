@@ -7,28 +7,23 @@ tags:
   - stellar spectra
 authors:
   - name: Telmo Monteiro
-    orcid: 0000-0000-0000-0000
-    corresponding: true # (This is how to denote the corresponding author)
-    equal-contrib: true
+    orcid: 0000-0001-8991-4615
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
   - name: João Gomes da Silva
-    orcid: 0000-0000-0000-0000
-    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
+    orcid: 0000-0001-8056-9202
     affiliation: 2
   - name: Elisa Delgado-Mena
-    orcid: 0000-0000-0000-0000
-    equal-contrib: true
+    orcid: 0000-0003-4434-2195
     affiliation: 3
   - name: Nuno C. Santos
-    orcid: 0000-0000-0000-0000
-    equal-contrib: true
+    orcid: 0000-0002-0580-0475
     affiliation: "1,2"
 affiliations:
  - name: Departamento de Física e Astronomia, Faculdade de Ciências, Universidade do Porto, Rua do Campo Alegre, 4169-007 Porto, Portugal
    index: 1
  - name: Instituto de Astrofísica e Ciências do Espaço, Universidade do Porto, CAUP, Rua das Estrelas, 4150-762 Porto, Portugal
    index: 2
- - name: CAB-CSIC
+ - name: Centro de Astrobiología (CAB), CSIC-INTA, Camino Bajo del Castillo s/n, 28692, Villanueva de la Cañada (Madrid), Spain
    index: 3
 date: 14 May 2025
 bibliography: paper.bib
@@ -37,11 +32,14 @@ bibliography: paper.bib
 
 # Summary
 
-Stellar variability can impact planetary signals detected via the RV method. This is often addressed by tracking spectral lines sensitive to magnetic or/and temperature changes in the stellar atmosphere. With the growing use of NIR instruments like NIRPS, understanding NIR activity indicators is crucial, as their sensitivity may vary with stellar properties.
-
-AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a specific spectral line, the user can see if the input period may be correlated with activity. AMATERASU follows a methodology similar to [@GomesdaSilva:2025, accepted] and is inspired by ACTIN ([@GomesdaSilva:2018], [@GomesdaSilva:2021]).  
+AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a specific spectral line, the user can see if the input period may be correlated with activity. The aim of this program is to provide an easy and quick way to check for clues that the period observed in, for example, RV is of stellar origin. AMATERASU follows a methodology similar to [@GomesdaSilva:2025, accepted] and is inspired by ACTIN ([@GomesdaSilva:2018], [@GomesdaSilva:2021]).  
 
 # Statement of need
+
+Stellar variability can impact planetary signals detected via the RV method. This is often addressed by tracking spectral lines sensitive to magnetic or/and temperature changes in the stellar atmosphere. With the growing use of NIR instruments like NIRPS, understanding NIR activity indicators is crucial, as their sensitivity may vary with stellar properties.
+While several tools exist to compute spectral indices (e.g., ACTIN), few provide a straightforward way to systematically test whether a given periodicity, such as a candidate planet signal, may be reproduced in activity indicators. In this context, AMATERASU fills a gap by enabling users to efficiently compute equivalent-widths (EWs) of spectral lines, search for periodicities in their time-series and identify whether those periods match an input period. 
+By combining flexible input formats, automatic window definition, and batch analysis of multiple lines and periods, AMATERASU provides a targeted, user-friendly and quick solution to validate the stellar or planetary origin of RV signals.
+
 
 # Description
 
@@ -66,6 +64,8 @@ AMATERASU has two modes: standard and full output. The standard output is the fa
 - table with all significant periods found
 - table with all the information on the periodograms
 - table with the Spearman correlations per bandpass with input array
+
+So far, we only tested AMATERASU with NIRPS data, so the predefined indices consist in NIR lines. Additionally, AMATERASU's automatic window definition only works for simmetrical absorption lines with high depth, so it will fail for lines with assimetrical profiles, with core emission or with blends.
 
 The code is available and will be updated on [GitHub][] and can be easily installed using pip.
 
