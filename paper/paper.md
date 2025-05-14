@@ -1,120 +1,74 @@
 ---
-title: 'Gala: A Python package for galactic dynamics'
+title: 'AMATERASU: a tool to track stellar activity'
 tags:
   - Python
   - astronomy
-  - dynamics
-  - galactic dynamics
-  - milky way
+  - stellar activity
+  - stellar spectra
 authors:
-  - name: Adrian M. Price-Whelan
+  - name: Telmo Monteiro
     orcid: 0000-0000-0000-0000
+    corresponding: true # (This is how to denote the corresponding author)
     equal-contrib: true
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
-  - name: Author Without ORCID
+  - name: João Gomes da Silva
+    orcid: 0000-0000-0000-0000
     equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
     affiliation: 2
-  - name: Author with no affiliation
-    corresponding: true # (This is how to denote the corresponding author)
+  - name: Elisa Delgado-Mena
+    orcid: 0000-0000-0000-0000
+    equal-contrib: true
     affiliation: 3
-  - given-names: Ludwig
-    dropping-particle: van
-    surname: Beethoven
-    affiliation: 3
+  - name: Nuno C. Santos
+    orcid: 0000-0000-0000-0000
+    equal-contrib: true
+    affiliation: "1,2"
 affiliations:
- - name: Lyman Spitzer, Jr. Fellow, Princeton University, United States
+ - name: Departamento de Física e Astronomia, Faculdade de Ciências, Universidade do Porto, Rua do Campo Alegre, 4169-007 Porto, Portugal
    index: 1
-   ror: 00hx57361
- - name: Institution Name, Country
+ - name: Instituto de Astrofísica e Ciências do Espaço, Universidade do Porto, CAUP, Rua das Estrelas, 4150-762 Porto, Portugal
    index: 2
- - name: Independent Researcher, Country
+ - name: CAB-CSIC
    index: 3
-date: 13 August 2017
+date: 14 May 2025
 bibliography: paper.bib
 
-# Optional fields if submitting to a AAS journal too, see this blog post:
-# https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
-aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
-aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
 
 # Summary
 
-The forces on stars, galaxies, and dark matter under external gravitational
-fields lead to the dynamical evolution of structures in the universe. The orbits
-of these bodies are therefore key to understanding the formation, history, and
-future state of galaxies. The field of "galactic dynamics," which aims to model
-the gravitating components of galaxies to study their structure and evolution,
-is now well-established, commonly taught, and frequently used in astronomy.
-Aside from toy problems and demonstrations, the majority of problems require
-efficient numerical tools, many of which require the same base code (e.g., for
-performing numerical orbit integration).
+Stellar variability can impact planetary signals detected via the RV method. This is often addressed by tracking spectral lines sensitive to magnetic or/and temperature changes in the stellar atmosphere. With the growing use of NIR instruments like NIRPS, understanding NIR activity indicators is crucial, as their sensitivity may vary with stellar properties.
+
+AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a specific spectral line, the user can see if the input period may be correlated with activity. AMATERASU follows a methodology similar to [@GomesdaSilva:2025, accepted] and is inspired by ACTIN ([@GomesdaSilva:2018], [@GomesdaSilva:2021]).  
 
 # Statement of need
 
-`Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
+# Description
 
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
+AMATERASU computes the equivalent-width (EW) of a spectral line in a normalization independent way, by using the 90th percentile of the flux in a given window as the continuum level. It then computes the EW for an array of bandpasses, going from 0.1 \r{A} up to a user defined width.
+This way, the input includes the spectral line center, maximum bandpass width window and a window that includes both the line and some continuum flux. The flux is interpolated inside the window using the \texttt{specutils} packag, with a step similar to the original spectrum's step, to align the spectrum portion with the bandpass edges. 
 
-# Mathematics
+The maximum bandpass and interpolation window can be given manually or automatically. In the automatic way, the spectra are coadded into a master spectrum, using the first spectrum as the common reference grid, which is then smoothed with a moving average. Then, the \texttt{find_peaks} function from the \texttt{scipy} package is used to find the spectral lines and then retrieves the FWHM of the closest line to be studied (with a threshold of 0.1 \r{A}). The bandpass window is a multiple (rounded) of the FWHM retrieved (by default 5 times) and the interpolation window is triple that (15 times the FWHM). Having retrieved a time series of EWs measurements for a given bandpass, AMATERASU cleans the data by applying a 3-$\sigma$ sequential clipping and binning the data by night. 
 
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
+Finally, AMATERASU runs Generalized Lomb-Scargle (GLS) periodograms [@Zechmeister:2009] and extracts the significant peaks. These are the ones not close to peaks in the window function periodogram and with a false alarm probability (FAP) under the specified FAP threshold. If any of the significant peaks is close within the specified threshold to the input period, the program warns the user.
 
-Double dollars make self-standing equations:
+The user can choose one of the predefined indices in the ``ind_table.csv`` table or test a new indice. 
+The tool accepts a list of input periods and a list of lines to analyse, as well as 1D or 2D spectra. To be more flexible with the instruments tested, the spectra have to be given in an array format: for 2D spectra, the array should have dimensions of ($N_\text{obs}$,$N_\text{spectrum axis}$,$N_\text{orders}$,$N_\text{pixels}$), where $N_\text{spectrum axis}$ refers for the wavelength, flux and flux error of the each spectrum. An array with the dates of observations in BJD is also needed.
 
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
+Besides the GLS periodograms, AMATERASU can also compute the Spearman ranked correlation coefficient between all the central bandpasses and an input array, for example a known activity indice, like the CCF FWHM of the observations.
 
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
+AMATERASU has two modes: standard and full output. The standard output is the fastest, as it only computes the EW time-series and correspondent GLS periodograms, prints wether any of the periods is close to the input one and saves (if wanted) a \texttt{.csv} file with the matching periods and respective central bandpasses and a \texttt{.csv} file with the correlations with the input array per bandpass (if wanted). The full output allows to save all analysis data in a directory, including:
 
-# Citations
+- table with the EW values and errors for each central bandpass, as well as the BJD time
+- plot of time-series of each EW computed and corresponding GLS periodogram
+- separate periodogram and WF periodogram for each EW (for debugging purposes)
+- table with the periods matching input
+- table with all significant periods found
+- table with all the information on the periodograms
+- table with the Spearman correlations per bandpass with input array
 
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
+The code is available and will be updated on [GitHub][] and can be easily installed using pip.
 
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
-
-# Acknowledgements
-
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
+[GitHub]: https://github.com/telmonteiro/AMATERASU
 
 # References
