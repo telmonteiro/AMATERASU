@@ -39,6 +39,7 @@ AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) i
 Stellar variability can impact planetary signals detected via the RV method. This is often addressed by tracking spectral lines sensitive to magnetic or/and temperature changes in the stellar atmosphere. With the growing use of NIR instruments like NIRPS, understanding NIR activity indicators is crucial, as their sensitivity may vary with stellar properties.
 While several tools exist to compute spectral indices (e.g., ACTIN), few provide a straightforward way to systematically test whether a given periodicity, such as a candidate planet signal, may be reproduced in activity indicators. In this context, AMATERASU fills a gap by enabling users to efficiently compute equivalent-widths (EWs) of spectral lines, search for periodicities in their time-series and identify whether those periods match an input period. 
 By combining flexible input formats, automatic window definition, and batch analysis of multiple lines and periods, AMATERASU provides a targeted, user-friendly and quick solution to validate the stellar or planetary origin of RV signals.
+While AMATERASU was born with NIR activity indicators in mind, it is easily appliable to optical spectra.
 
 
 # Description
