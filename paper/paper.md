@@ -32,7 +32,7 @@ bibliography: paper.bib
 
 # Summary
 
-AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a specific spectral line, the user can see if the input period may be correlated with activity. The aim of this program is to provide an easy and quick way to check for clues that the period observed in, for example, RV is of stellar origin. AMATERASU follows a methodology similar to @GomesdaSilva:2025 (accepted) and is inspired by ACTIN [@GomesdaSilva:2018, @GomesdaSilva:2021].  
+AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a specific spectral line, the user can see if the input period may be correlated with activity. The aim of this program is to provide an easy and quick way to check for clues that the period observed in, for example, RV is of stellar origin. AMATERASU follows a methodology similar to @GomesdaSilva:2025 (accepted) and is inspired by ACTIN [@GomesdaSilva:2018], [@GomesdaSilva:2021].  
 
 # Statement of need
 
