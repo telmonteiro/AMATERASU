@@ -32,14 +32,15 @@ bibliography: paper.bib
 
 # Summary
 
-AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a specific spectral line, the user can see if the input period may be correlated with activity. The aim of this program is to provide an easy and quick way to check for clues that the period observed in, for example, RV is of stellar origin. AMATERASU follows a methodology similar to @GomesdaSilva:2025 (accepted) and is inspired by ACTIN [@GomesdaSilva:2018], [@GomesdaSilva:2021].  
+AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a specific spectral line, the user can see if the input period may be correlated with activity. The aim of this program is to provide an easy and quick way to check for clues that the period observed in, for example, RV is of stellar origin. AMATERASU follows a methodology similar to @GomesdaSilva:2025 (accepted) and is inspired by ACTIN [@GomesdaSilva:2018,@GomesdaSilva:2021].  
 
 # Statement of need
 
 Stellar variability can impact planetary signals detected via the RV method. This is often addressed by tracking spectral lines sensitive to magnetic or/and temperature changes in the stellar atmosphere. With the growing use of NIR instruments like NIRPS, understanding NIR activity indicators is crucial, as their sensitivity may vary with stellar properties.
-While several tools exist to compute spectral indices (e.g., ACTIN), few provide a straightforward way to systematically test whether a given periodicity, such as a candidate planet signal, may be reproduced in activity indicators. In this context, AMATERASU fills a gap by enabling users to efficiently compute equivalent-widths (EWs) of spectral lines, search for periodicities in their time-series and identify whether those periods match an input period. 
+While several tools exist to compute spectral indices (e.g., ACTIN), few provide a straightforward way to systematically test whether a given periodicity, such as a candidate planet signal, may be reproduced in activity indicators. Additionally, tools like ACTIN only compute one version of a given activity indicator (e.g. with a fixed central bandpass), which may not be optimal to track stellar activity [@GomesdaSilva:2022].
+
+In this context, AMATERASU fills a gap by enabling users to efficiently compute equivalent-widths (EWs) of spectral lines, search for periodicities in their time-series and identify whether those periods match an input period. 
 By combining flexible input formats, automatic window definition, and batch analysis of multiple lines and periods, AMATERASU provides a targeted, user-friendly and quick solution to validate the stellar or planetary origin of RV signals.
-While AMATERASU was born with NIR activity indicators in mind, it is easily appliable to optical spectra.
 
 
 # Description
