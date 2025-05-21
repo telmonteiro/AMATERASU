@@ -18,7 +18,7 @@ class SpectraTreat:
     Attributes:
         resuls (tuple): line center, bandpass window, interpolation window, compressed array of spectral data 
     """
-    def __init__(self, spectra_observations, indice, indice_info=None, automatic_windows={"ln_win_mult":5,"interp_win_mult":3},plot_line=False):
+    def __init__(self, spectra_observations, indice, indice_info=None, automatic_windows={"ln_win_mult":5,"interp_win_mult":5},plot_line=False):
         
         if indice_info == None:
             ind_table = pd.read_csv("/home/telmo/Thesis/AMATERASU/ind_table.csv")
@@ -100,8 +100,9 @@ class SpectraTreat:
                 mask_interp = (wave_coadd >= ln_ctr - interp_win/2) & (wave_coadd <= ln_ctr + interp_win/2)
                 plt.plot(wave_coadd[mask_interp], flux_coadd[mask_interp])
                 plt.axvspan(ln_ctr - ln_win / 2, ln_ctr + ln_win / 2, alpha=0.1, color='yellow', ec = "black", lw = 2)
-                flux_c = np.percentile(np.array(flux_coadd, dtype=float)[mask_interp][(np.isnan(np.array(flux_coadd, dtype=float)[mask_interp])==False)], 90)
-                plt.axhline(flux_c,ls="--",color="black",label="90th percentile")
+                flux_coadd = np.array(flux_coadd, dtype=float)
+                flux_c = np.percentile(flux_coadd[mask_interp][(np.isnan(flux_coadd[mask_interp])==False)], 85)
+                plt.axhline(flux_c,ls="--",color="black",label="85th percentile")
                 plt.legend()
                 plt.show()
                 gc.collect()
