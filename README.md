@@ -22,7 +22,7 @@ The user can choose one of the predefined indices in the ``ind_table.csv`` table
 Besides the GLSPs, AMATERASU can compute the correlation of all the central bandpasses with an input array, that can be a known activity indice. It then prints the bandpass that maximizes correlation (positive or negative).
 
 Output options:
-    - Standard: warns if some input period was detect, in which line and with which FAP. Prints and saves a dataframe.
-    - Full: saves all analysis data in a directory.
+- Standard: warns if some input period was detect, in which line and with which FAP. Prints and saves a dataframe.
+- Full: saves all analysis data in a directory.
 
 - To run AMATERASU, make sure to have the packages needed downloaded. The Python version used to build AMATERASU was 3.10.12, ran inside WSL Ubuntu with VsCode.
