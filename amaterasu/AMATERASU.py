@@ -71,7 +71,7 @@ class AMATERASU:
     
                 #continuum flux
                 mask_c = (wave >= ln_ctr - interp_win/2) & (wave <= ln_ctr + interp_win/2)
-                flux_c = np.percentile(np.array(flux, dtype=float)[mask_c][(np.isnan(np.array(flux, dtype=float)[mask_c])==False)], 90)
+                flux_c = np.percentile(np.array(flux, dtype=float)[mask_c][(np.isnan(np.array(flux, dtype=float)[mask_c])==False)], 85)
                 flux_continuum[i] = flux_c
             
                 for j,bp in enumerate(bandpasses):
