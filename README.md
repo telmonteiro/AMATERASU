@@ -25,4 +25,4 @@ Output options:
 - Standard: warns if some input period was detect, in which line and with which FAP. Prints and saves a dataframe.
 - Full: saves all analysis data in a directory.
 
-- To run AMATERASU, make sure to have the packages needed downloaded. The Python version used to build AMATERASU was 3.10.12, ran inside WSL Ubuntu with VsCode.
+To run AMATERASU, make sure to have the packages needed downloaded. The Python version used to build AMATERASU was 3.10.12, ran inside WSL Ubuntu with VsCode.
