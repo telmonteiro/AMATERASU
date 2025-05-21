@@ -18,7 +18,7 @@ class SpectraTreat:
     Attributes:
         resuls (tuple): line center, bandpass window, interpolation window, compressed array of spectral data 
     """
-    def __init__(self, spectra_observations, indice, indice_info=None, automatic_windows={"ln_win_mult":5,"interp_win_mult":3},plot_line=False):
+    def __init__(self, spectra_observations, indice, indice_info=None, automatic_windows={"ln_win_mult":5,"interp_win_mult":5},plot_line=False):
         
         if indice_info == None:
             ind_table = pd.read_csv("/home/telmo/Thesis/AMATERASU/ind_table.csv")
