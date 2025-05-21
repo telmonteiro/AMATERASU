@@ -42,7 +42,6 @@ While several tools exist to compute spectral indices (e.g., ACTIN), few provide
 In this context, AMATERASU fills a gap by enabling users to efficiently compute equivalent-widths (EWs) of spectral lines, search for periodicities in their time-series and identify whether those periods match an input period. 
 By combining flexible input formats, automatic window definition, and batch analysis of multiple lines and periods, AMATERASU provides a targeted, user-friendly and quick solution to validate the stellar or planetary origin of RV signals.
 
-
 # Description
 
 AMATERASU computes the equivalent-width (EW) of a spectral line in a normalization independent way, by using the 85th percentile of the flux in a given window as the continuum level. It then computes the EW for an array of bandpasses, going from 0.1 \r{A} up to a user defined width.
