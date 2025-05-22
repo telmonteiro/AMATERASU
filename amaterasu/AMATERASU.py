@@ -310,7 +310,12 @@ class AMATERASU:
                     FAPS_fap_threshold_sorted = [np.nan]
                     periods_fap_threshold_sorted = [np.nan]
 
-                gls_dic = pd.DataFrame({"bandpass":[round(bandpasses[i],1)], 
+                if type(bandpasses[i]) == str:
+                    bp = round(bandpasses[i],1)
+                else:
+                    bp = round(bandpasses[i],1)
+                    
+                gls_dic = pd.DataFrame({"bandpass":[bp], 
                                         "period":[periods_fap_threshold_sorted], 
                                         "FAP":[FAPS_fap_threshold_sorted]})
                 gls_list.append(gls_dic)
