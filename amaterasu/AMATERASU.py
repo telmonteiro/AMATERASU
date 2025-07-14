@@ -30,7 +30,7 @@ class AMATERASU:
         plot_line (bool): spectral line plot.
         folder_path (str): path to save all plots and dataframes.
     """
-    def __init__(self, star, data, indice, indice_info, gls_options, correlation_options, output="standard", fixed_bandpass=None, interp=True, plot_line=False, folder_path=None):
+    def __init__(self, star, data, indice, indice_info, gls_options, correlation_options, output="standard", fixed_bandpass=None, interp=True, plot_line=False, sigma_clip=True, bin_night=True, folder_path=None):
 
         print(f"AMATERASU instance created for {star}")
 
@@ -71,7 +71,8 @@ class AMATERASU:
     
                 #continuum flux
                 mask_c = (wave >= ln_ctr - interp_win/2) & (wave <= ln_ctr + interp_win/2)
-                flux_c = np.percentile(np.array(flux, dtype=float)[mask_c][(np.isnan(np.array(flux, dtype=float)[mask_c])==False)], 85)
+                flux_float_c = np.array(flux, dtype=float)[mask_c]
+                flux_c = np.percentile(flux_float_c[(np.isnan(flux_float_c)==False)], 85)
                 flux_continuum[i] = flux_c
             
                 for j,bp in enumerate(bandpasses):
@@ -90,7 +91,7 @@ class AMATERASU:
             ew_error_cols = [f"{ind}{int(round(bp*10,0)):02d}_EW_error" for bp in bandpasses]
 
             df_raw = pd.DataFrame(np.column_stack([bjd, flux_continuum, ew, ew_error]),columns=["BJD","flux_continuum"] + ew_cols + ew_error_cols)
-            df_clean = time_series_clean(df_raw, ew_cols, ew_error_cols, sigma=3).df
+            df_clean = time_series_clean(df_raw, ew_cols, ew_error_cols, sigma_clip, bin_night, sigma=3).df
 
             if folder_path and output=="full":
                 
@@ -156,7 +157,7 @@ class AMATERASU:
                     df_flag = df_flag.groupby(["bandpass", "period", "FAP"]).agg({"input_period": list}).reset_index()
                     df_flag = df_flag[["bandpass", "period", "FAP", "input_period"]]
 
-                if len(df_flag["period"][0]) == 0:
+                if len(df_flag) == 0:
 
                     print("No period similar to inputs detected!")
                     gls_df_cleaned = gls_df[~gls_df["period"].apply(lambda p: all(pd.isna(x) for x in p))]
@@ -178,6 +179,7 @@ class AMATERASU:
                     
                     print(f"Bandpass with period near to input and lowest FAP: {optimal_bandpass}")
                     print(f"Period [d]: {optimal_period}\nFAP: {optimal_fap:.2e}")
+                    print(f"Number of bandpasses that detect period near to input: {len(df_flag)}")
                     print(df_flag)
 
                 if folder_path:
@@ -196,7 +198,7 @@ class AMATERASU:
                 print("-"*80)
                 print("Computing Spearman correlations with input arrays.")
 
-                df_correlations = self._compute_correlation(df_clean, bandpasses, ew_cols, df_input, cols_input, cols_err_input)
+                df_correlations = self._compute_correlation(df_clean, bandpasses, ew_cols, df_input, cols_input, cols_err_input, sigma_clip, bin_night)
 
                 if output=="full":
                     df_correlations.to_csv(spec_lines_folder+f"correlations_{star}_{ind}.csv")
@@ -261,8 +263,8 @@ class AMATERASU:
 
         return spec_re.wavelength.value, spec_re.flux.value, spec_re.uncertainty.array
 
-
-    def _compute_gls(self,star,ind,bandpasses,period_test,fap_treshold,df_clean,ew_cols,plot_gls,output,spec_lines_folder):
+    @staticmethod
+    def _compute_gls(star,ind,bandpasses,period_test,fap_treshold,df_clean,ew_cols,plot_gls,output,spec_lines_folder):
 
             gls_list = []; gls_results_lists = []
 
@@ -309,9 +311,9 @@ class AMATERASU:
                 else:
                     FAPS_fap_threshold_sorted = [np.nan]
                     periods_fap_threshold_sorted = [np.nan]
-
+                
                 if type(bandpasses[i]) == str:
-                    bp = round(bandpasses[i],1)
+                    bp = bandpasses[i]
                 else:
                     bp = round(bandpasses[i],1)
                     
@@ -329,9 +331,9 @@ class AMATERASU:
             return gls_df, all_gls_df
     
     @staticmethod
-    def _compute_correlation(df_ew, bandpasses, ew_cols, df_input_raw, cols_input, cols_err_input):
+    def _compute_correlation(df_ew, bandpasses, ew_cols, df_input_raw, cols_input, cols_err_input, sigma_clip, bin_night):
         
-        df_input = time_series_clean(df_input_raw, cols_input, cols_err_input, sigma=3).df
+        df_input = time_series_clean(df_input_raw, cols_input, cols_err_input, sigma_clip, bin_night, sigma=3).df
 
         df_correlations = pd.DataFrame({"bandpass":np.around(bandpasses,1)})
 

@@ -23,7 +23,7 @@ class gls_periodogram:
     Returns:
         dict: Dictionary containing periodogram results.
     """
-    def __init__(self, star, period_test, ind, x, y, y_err, pmin=1.5, pmax=1e3, steps=1e4, folder_path=None):
+    def __init__(self, star, period_test, ind, x, y, y_err, pmin=1.5, pmax=1e3, steps=1e5, folder_path=None):
 
         x = np.asarray(x)
         y = np.asarray(y)

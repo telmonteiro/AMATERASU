@@ -3,42 +3,54 @@ import pandas as pd
 
 class time_series_clean:
 
-    def __init__(self, df_raw, inds, inds_errors, sigma=3):
+    def __init__(self, df_raw, inds, inds_errors, sigma_clip, bin_night, sigma):
 
-        df = df_raw.copy()
-        #sequential sigma clip
-        for j in range(len(inds)):
-            df_ind = self._seq_sigma_clip(df, inds[j], sigma=sigma)
-            df_err = self._seq_sigma_clip(df, inds_errors[j], sigma=sigma)
+        if sigma_clip:
 
-            #combine both and set to NaN only for that pair
-            mask = df_ind[inds[j]].isna() | df_err[inds_errors[j]].isna()
-            df.loc[mask, [inds[j], inds_errors[j]]] = np.nan
+            df_clean = df_raw.copy()
+            #sequential sigma clip
+            for j in range(len(inds)):
 
-        #binning the data to days
-        table = pd.DataFrame()
-        bin_bjd = None
+                df_ind = self._seq_sigma_clip(df_clean, inds[j], sigma=sigma)
+                df_err = self._seq_sigma_clip(df_clean, inds_errors[j], sigma=sigma)
 
-        for i in range(len(inds)):
-            if pd.api.types.is_numeric_dtype(df[inds[i]]):
-                #if the column contains numeric values, apply binning
-                bin_bjd, bin_column_values, bin_column_values_err = self._bin_data(df["BJD"], df[inds[i]], df[inds_errors[i]])
-                temp_df = pd.DataFrame({f"{inds[i]}":bin_column_values, f"{inds_errors[i]}":bin_column_values_err})
-                table = pd.concat([table, temp_df], axis=1)
+                #combine both and set to NaN only for that pair
+                mask = df_ind[inds[j]].isna() | df_err[inds_errors[j]].isna()
+                df_clean.loc[mask, [inds[j], inds_errors[j]]] = np.nan
 
-                if bin_bjd is not None and i == 0:
-                    table["BJD"] = bin_bjd  #add BJD column only once
-            else:
-                temp_df = pd.DataFrame({f"{inds[i]}":df[inds[i]], f"{inds_errors[i]}":df[inds_errors[i]]})
-                table = pd.concat([table, temp_df], axis=1)
+        if bin_night:
+            #binning the data to days
+            table = pd.DataFrame()
+            bin_bjd = None
 
-            mask = table[inds[i]].isna() | table[inds_errors[i]].isna()
-            table.loc[mask, [inds[i], inds_errors[i]]] = np.nan
+            for i in range(len(inds)):
 
-        self.df = table.apply(pd.to_numeric, errors='coerce')
+                if pd.api.types.is_numeric_dtype(df_clean[inds[i]]):
+                    #if the column contains numeric values, apply binning
+                    bin_bjd, bin_column_values, bin_column_values_err = self._bin_data(df_clean["BJD"], df_clean[inds[i]], df_clean[inds_errors[i]])
+                    temp_df = pd.DataFrame({f"{inds[i]}":bin_column_values, f"{inds_errors[i]}":bin_column_values_err})
+                    table = pd.concat([table, temp_df], axis=1)
 
-        if "flux_continuum" in df.columns:
-            self.df["flux_continuum"] = df["flux_continuum"]
+                    if bin_bjd is not None and i == 0:
+                        table["BJD"] = bin_bjd  #add BJD column only once
+
+                else:
+                    temp_df = pd.DataFrame({f"{inds[i]}":df_clean[inds[i]], f"{inds_errors[i]}":df_clean[inds_errors[i]]})
+                    table = pd.concat([table, temp_df], axis=1)
+
+                mask = table[inds[i]].isna() | table[inds_errors[i]].isna()
+                table.loc[mask, [inds[i], inds_errors[i]]] = np.nan
+
+            df_clean = table.apply(pd.to_numeric, errors='coerce')
+
+        if sigma_clip == False and bin_night == False:
+            self.df = df_raw
+            if "flux_continuum" in df_raw.columns:
+                self.df["flux_continuum"] = df_raw["flux_continuum"]
+        else:
+            self.df = df_clean
+            if "flux_continuum" in df_clean.columns:
+                self.df["flux_continuum"] = df_clean["flux_continuum"]
 
 
     def _bin_data(self, x, y, err=None, bsize=1):

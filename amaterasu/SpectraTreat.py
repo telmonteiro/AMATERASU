@@ -68,7 +68,7 @@ class SpectraTreat:
                 wave_coadd = wave_coadd[(wave_coadd >= ln_ctr - 25) & (wave_coadd <= ln_ctr + 25)]
                 flux_coadd = flux_coadd[(wave_coadd >= ln_ctr - 25) & (wave_coadd <= ln_ctr + 25)]
 
-            N = 5
+            N = 2
             flux_coadd = np.convolve(flux_coadd, np.ones(N)/N, mode='same')
             inverted_flux = -flux_coadd
 
