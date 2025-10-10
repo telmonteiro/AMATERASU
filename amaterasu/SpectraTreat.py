@@ -28,7 +28,7 @@ class SpectraTreat:
 
         ln_ctr = indice_info["ln_ctr"]
 
-        if len(spectra_observations.shape) == 4:
+        if len(spectra_observations.shape) > 3:
 
             spectra_obs = []
 
@@ -60,13 +60,13 @@ class SpectraTreat:
 
         else:
             #coadd, find_peaks, define windows
-            if len(spectra_observations.shape) == 4:
+            if len(spectra_observations.shape) > 3:
                 wave_grid = self._wavelength_2D_grid(spectra_obs)
                 wave_coadd, flux_coadd = self._coadd_spectra_s2d(spectra_obs, wave_grid)
             else:
                 wave_coadd, flux_coadd = self._coadd_spectra_s1d(spectra_obs)
-                wave_coadd = wave_coadd[(wave_coadd >= ln_ctr - 25) & (wave_coadd <= ln_ctr + 25)]
                 flux_coadd = flux_coadd[(wave_coadd >= ln_ctr - 25) & (wave_coadd <= ln_ctr + 25)]
+                wave_coadd = wave_coadd[(wave_coadd >= ln_ctr - 25) & (wave_coadd <= ln_ctr + 25)]
 
             N = 2
             flux_coadd = np.convolve(flux_coadd, np.ones(N)/N, mode='same')
@@ -94,16 +94,14 @@ class SpectraTreat:
             if plot_line:
 
                 plt.figure(figsize=(9, 3.5))
-                plt.title(f"{indice} coadded and smoothed line")
+                plt.title(f"{indice} coadded line")
                 plt.xlabel(r"$\lambda$ [Å]")
                 plt.ylabel("Flux")
                 mask_interp = (wave_coadd >= ln_ctr - interp_win/2) & (wave_coadd <= ln_ctr + interp_win/2)
                 plt.plot(wave_coadd[mask_interp], flux_coadd[mask_interp])
                 plt.axvspan(ln_ctr - ln_win / 2, ln_ctr + ln_win / 2, alpha=0.1, color='yellow', ec = "black", lw = 2)
-                flux_coadd = np.array(flux_coadd, dtype=float)
-                flux_c = np.percentile(flux_coadd[mask_interp][(np.isnan(flux_coadd[mask_interp])==False)], 85)
-                plt.axhline(flux_c,ls="--",color="black",label="85th percentile")
-                plt.legend()
+                flux_c = np.percentile(np.array(flux_coadd[mask_interp], dtype=float)[(np.isnan(np.array(flux_coadd[mask_interp], dtype=float))==False)], 85)
+                plt.axhline(flux_c)
                 plt.show()
                 gc.collect()
             
