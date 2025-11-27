@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tqdm
 import os
-from specutils import Spectrum1D, manipulation
+from specutils import Spectrum, manipulation
 from scipy.stats import spearmanr
 from astropy.nddata import StdDevUncertainty
 import astropy.units as u
@@ -258,7 +258,7 @@ class AMATERASU:
         x_interp = np.linspace(lambda_min, lambda_max, n_points)
 
         resampler = manipulation.SplineInterpolatedResampler()
-        spec = Spectrum1D(spectral_axis=wave_win*u.AA, flux=flux_win*u.dimensionless_unscaled, uncertainty=StdDevUncertainty(flux_error_win*u.dimensionless_unscaled))
+        spec = Spectrum(spectral_axis=wave_win*u.AA, flux=flux_win*u.dimensionless_unscaled, uncertainty=StdDevUncertainty(flux_error_win*u.dimensionless_unscaled))
         spec_re = resampler(spec, x_interp * u.AA)
 
         return spec_re.wavelength.value, spec_re.flux.value, spec_re.uncertainty.array

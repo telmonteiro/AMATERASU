@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import gc
 import numpy as np
-from specutils import Spectrum1D, manipulation 
+from specutils import Spectrum, manipulation 
 import astropy.units as u
 from scipy.signal import find_peaks
 
@@ -11,7 +11,7 @@ class SpectraTreat:
     Args:
         spectra_observations (numpy array): array of spectral data with format (N_spectra, N_axis, N_orders, N_pixels). N_axis = 3 (wavelength, flux and flux error) and N_orders = 1 in case of 1D spectra.
         indice (str): identifier of indice / spectral line.
-        indice_info (dict): Dictionary containing the line identifier ``ln_id``, the line center ``ln_ctr``, the maximum bandpass ``ln_win`` and the interpolation window ``total_win``. If None, fetches ind_table.csv.
+        indice_info (dict or str): Dictionary containing the line identifier ``ln_id``, the line center ``ln_ctr``, the maximum bandpass ``ln_win`` and the interpolation window ``interp_win``. If it's a string, it interprets it as a path for an .csv file, fetches it and converts into a dict.
         automatic_windows (dict): if window definition is automatic, the multiplier of the FWHM for each window.
         plot_line (bool): plot coadded and smoothed spectra line or not.
 
@@ -20,12 +20,12 @@ class SpectraTreat:
     """
     def __init__(self, spectra_observations, indice, indice_info=None, automatic_windows={"ln_win_mult":5,"interp_win_mult":5},plot_line=False):
         
-        if indice_info == None:
-            ind_table = pd.read_csv("/home/telmo/Thesis/AMATERASU/ind_table.csv")
-            indice_info = ind_table[ind_table["ln_id"]==indice].to_dict(orient='records')[0]
-        else:
-            indice_info = indice_info[indice]
+        if type(indice_info) == str:
+            ind_table = pd.read_csv(indice_info)
+            ind_table = ind_table.to_dict(orient='records')
+            indice_info = {d['ln_id']: {k:v for k,v in d.items() if k != 'ln_id'} for d in ind_table}
 
+        indice_info = indice_info[indice]
         ln_ctr = indice_info["ln_ctr"]
 
         if len(spectra_observations.shape) > 3:
@@ -133,7 +133,7 @@ class SpectraTreat:
     def _coadd_spectra_s2d(self, spectra_obs, wave_grid):
 
         new_disp_grid = np.arange(wave_grid[1], wave_grid[2], wave_grid[0]) * u.AA
-        new_spec = Spectrum1D(spectral_axis=new_disp_grid, flux=np.zeros_like(new_disp_grid / u.AA) * u.electron)
+        new_spec = Spectrum(spectral_axis=new_disp_grid, flux=np.zeros_like(new_disp_grid / u.AA) * u.electron)
 
         for i in range(spectra_obs.shape[0]):
 
@@ -146,7 +146,7 @@ class SpectraTreat:
             wave = wave * u.AA
             flux = flux * u.electron
 
-            input_spec = Spectrum1D(spectral_axis=wave, flux=flux)
+            input_spec = Spectrum(spectral_axis=wave, flux=flux)
             spline = manipulation.SplineInterpolatedResampler()
 
             new_spec_sp = spline(input_spec, new_disp_grid)
@@ -161,7 +161,7 @@ class SpectraTreat:
         delta_lambda = np.median(np.diff(wave_0))
 
         new_disp_grid = np.arange(np.min(wave_0)+10, np.max(wave_0)-10, delta_lambda) * u.AA
-        new_spec = Spectrum1D(spectral_axis=new_disp_grid, flux=np.zeros_like(new_disp_grid / u.AA) * u.dimensionless_unscaled)
+        new_spec = Spectrum(spectral_axis=new_disp_grid, flux=np.zeros_like(new_disp_grid / u.AA) * u.dimensionless_unscaled)
 
         for i in range(spectra_obs.shape[0]):
 
@@ -173,7 +173,7 @@ class SpectraTreat:
             wave = wave * u.AA
             flux = flux * u.dimensionless_unscaled
 
-            input_spec = Spectrum1D(spectral_axis=wave, flux=flux)
+            input_spec = Spectrum(spectral_axis=wave, flux=flux)
             spline = manipulation.SplineInterpolatedResampler()
 
             new_spec_sp = spline(input_spec, new_disp_grid)
