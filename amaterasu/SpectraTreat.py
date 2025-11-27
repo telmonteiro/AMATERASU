@@ -18,13 +18,8 @@ class SpectraTreat:
     Attributes:
         resuls (tuple): line center, bandpass window, interpolation window, compressed array of spectral data 
     """
-    def __init__(self, spectra_observations, indice, indice_info=None, automatic_windows={"ln_win_mult":5,"interp_win_mult":5},plot_line=False):
+    def __init__(self, spectra_observations, indice, indice_info, automatic_windows={"ln_win_mult":5,"interp_win_mult":5},plot_line=False):
         
-        if type(indice_info) == str:
-            ind_table = pd.read_csv(indice_info)
-            ind_table = ind_table.to_dict(orient='records')
-            indice_info = {d['ln_id']: {k:v for k,v in d.items() if k != 'ln_id'} for d in ind_table}
-
         indice_info = indice_info[indice]
         ln_ctr = indice_info["ln_ctr"]
 
