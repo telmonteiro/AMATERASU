@@ -25,14 +25,14 @@ affiliations:
    index: 2
  - name: Centro de Astrobiología (CAB), CSIC-INTA, Camino Bajo del Castillo s/n, 28692, Villanueva de la Cañada (Madrid), Spain
    index: 3
-date: 14 May 2025
+date: 2 March 2026
 bibliography: paper.bib
 
 ---
 
 # Summary
 
-AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a specific spectral line, the user can see if the input period may be correlated with activity. The aim of this program is to provide an easy and quick way to check for clues that the period observed in, for example, RV is of stellar origin. AMATERASU follows a methodology similar to @GomesdaSilva:2025 (accepted) and is inspired by ACTIN [@GomesdaSilva:2018], [@GomesdaSilva:2021].  
+AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a specific spectral line, the user can see if the input period may be correlated with activity. The aim of this program is to provide an easy and quick way to check for clues that the period observed in, for example, RV is of stellar origin. AMATERASU follows a methodology similar to @GomesdaSilva:2025 and is inspired by ACTIN [@GomesdaSilva:2018], [@GomesdaSilva:2021].  
 
 # Statement of need
 
@@ -42,7 +42,9 @@ While several tools exist to compute spectral indices (e.g., ACTIN), few provide
 In this context, AMATERASU fills a gap by enabling users to efficiently compute equivalent-widths (EWs) of spectral lines, search for periodicities in their time-series and identify whether those periods match an input period. 
 By combining flexible input formats, automatic window definition, and batch analysis of multiple lines and periods, AMATERASU provides a targeted, user-friendly and quick solution to validate the stellar or planetary origin of RV signals.
 
-# Description
+# State of the field   
+
+# Software design
 
 AMATERASU computes the equivalent-width (EW) of a spectral line in a normalization independent way, by using the 85th percentile of the flux in a given window as the continuum level. It then computes the EW for an array of bandpasses, going from 0.1 \r{A} up to a user defined width.
 This way, the input includes the spectral line center, maximum bandpass width window and a window that includes both the line and some continuum flux. The flux is interpolated inside the window using the \texttt{specutils} package, with a step similar to the original spectrum's step, to align the spectrum portion with the bandpass edges. 
@@ -71,5 +73,9 @@ So far, we only tested AMATERASU with NIRPS data, so the predefined indices cons
 The code is available and will be updated on [GitHub][] and can be easily installed using pip.
 
 [GitHub]: https://github.com/telmonteiro/AMATERASU
+
+# Research impact statement
+
+# AI usage disclosure
 
 # References
