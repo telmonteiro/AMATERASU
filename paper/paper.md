@@ -11,13 +11,16 @@ authors:
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
   - name: João Gomes da Silva
     orcid: 0000-0001-8056-9202
-    affiliation: 2
+    affiliation: "2"
   - name: Elisa Delgado-Mena
     orcid: 0000-0003-4434-2195
-    affiliation: 3
+    affiliation: "3"
   - name: Nuno C. Santos
     orcid: 0000-0002-0580-0475
     affiliation: "1,2"
+  - name: Ana Soldevilla
+    orcid:
+    affiliation: "3,4"
 affiliations:
  - name: Departamento de Física e Astronomia, Faculdade de Ciências, Universidade do Porto, Rua do Campo Alegre, 4169-007 Porto, Portugal
    index: 1
@@ -25,7 +28,7 @@ affiliations:
    index: 2
  - name: Centro de Astrobiología (CAB), CSIC-INTA, Camino Bajo del Castillo s/n, 28692, Villanueva de la Cañada (Madrid), Spain
    index: 3
-date: 2 March 2026
+date: 4 March 2026
 bibliography: paper.bib
 
 ---
