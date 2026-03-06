@@ -35,17 +35,35 @@ bibliography: paper.bib
 
 # Summary
 
-AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a specific spectral line, the user can see if the input period may be correlated with activity. The aim of this program is to provide an easy and quick way to check for clues that the period observed in, for example, RV is of stellar origin. AMATERASU follows a methodology similar to @GomesdaSilva:2025 and is inspired by ACTIN [@GomesdaSilva:2018], [@GomesdaSilva:2021].  
+AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a specific spectral line, the user can see if the input period may be correlated with activity. The aim of this program is to provide an easy and quick way to check for clues that the period observed in, for example, RV is of stellar origin. AMATERASU follows a methodology similar to [@GomesdaSilva:2025] and is inspired by ACTIN [@GomesdaSilva:2018], [@GomesdaSilva:2021].  
 
 # Statement of need
 
-Stellar variability can impact planetary signals detected via the RV method. This is often addressed by tracking spectral lines sensitive to magnetic or/and temperature changes in the stellar atmosphere. With the growing use of NIR instruments like NIRPS, understanding NIR activity indicators is crucial, as their sensitivity may vary with stellar properties.
-While several tools exist to compute spectral indices (e.g., ACTIN), few provide a straightforward way to systematically test whether a given periodicity, such as a candidate planet signal, may be reproduced in activity indicators. Additionally, tools like ACTIN only compute one version of a given activity indicator (e.g. with a fixed central bandpass), which may not be optimal to track stellar activity [@GomesdaSilva:2022].
+Stellar variability can impact planetary signals detected via the radial velocity (RV) method. This is often addressed by tracking spectral lines sensitive to magnetic or/and temperature changes in the stellar atmosphere. 
 
-In this context, AMATERASU fills a gap by enabling users to efficiently compute equivalent-widths (EWs) of spectral lines, search for periodicities in their time-series and identify whether those periods match an input period. 
-By combining flexible input formats, automatic window definition, and batch analysis of multiple lines and periods, AMATERASU provides a targeted, user-friendly and quick solution to validate the stellar or planetary origin of RV signals.
+For this, different methods are currently used. For example, one can examine the variability in the cross-correlation function (CCF) parameters. 
+The use of individual (or doublets and triplets) spectral lines as proxies for stellar activity is also popular, either in the optical or in the near infrared. 
+Regarding these last ones, one can measure activity related line distortions through properties like the full width at half maximum (FWHM), depth or bisector, or through overall changes in the flux in the line, like equivalent-widths (EW) or simple flux ratios.
+
+With the exoplanet hunters community pushing through to find Earth twins, understanding activity indicators behavior is crucial, as their sensitivity may vary with stellar properties, to detrend stellar activity from the signal from a orbiting planet.
+
+In this context, we built the AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling code (AMATERASU). This tool enables users to efficiently compute pseudo equivalent-widths (pEW) of spectral lines, search for periodicities in their time-series and identify whether those periods match an input. 
+By combining instrument independent inputs, automatic adjustments and batch analysis of multiple lines and periods, AMATERASU provides a user-friendly and quick way to validate the stellar or planetary origin of RV signals.
 
 # State of the field   
+
+Some tools already exist to compute spectral indices, like ACTIN [@GomesdaSilva:2018,@GomesdaSilva:2021] and iSTARMOD [@Labarga:2025,@Labarga:2026]. 
+ACTIN computes the ratio between the flux inside a spectral line, delimited by a given central bandpass, and the flux in reference regions, usually the spectral continuum.
+iSTARMOD uses the spectral subtraction technique, which involves subtracting the total flux emitted along a line by its photospheric contribution, obtained via synthesis of a quiescent version of the spectrum from a reference star with the same properties (spectral type, RV and rotational velocity). The final activity index is the EW of the residual profile.
+
+While these tools are very useful for a variety of tasks, they only compute one version of a given activity index (with a fixed central bandpass), which may not be optimal to follow activity in different stars  [@GomesdaSilva:2022, Monteiro et al., in prep].
+Additionally, when testing a new index with ACTIN, the user needs to define the best reference regions, which is not straightforward when dealing with spectra affected by telluric lines (or their correction residuals) or lacking well defined continuum (often the case in M dwarves spectra). 
+
+Moreover, these tools do not provide a straightforward way to systematically test whether a given periodicity, such as a candidate planet signal, may be reproduced in activity indices.
+
+AMATERASU fills this gap, allowing easy computation of spectral pEWs and search for periodicities in their time-series. 
+In practice, AMATERASU tests if a given period can be obtained by adjusting different central bandpasses from a grid to a given target line, thereby finding, or not, if the period is also manifested through line deformations. 
+This tool could decrease false-positives arising from misidentified periodicities in RV and help improve planet search surveys. 
 
 # Software design
 
@@ -80,5 +98,7 @@ The code is available and will be updated on [GitHub][] and can be easily instal
 # Research impact statement
 
 # AI usage disclosure
+
+Generative AI tools were used during development for code completion and debugging. All AI-generated content was reviewed and refined by the authors. 
 
 # References
