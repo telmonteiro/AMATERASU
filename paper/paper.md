@@ -20,7 +20,7 @@ authors:
     affiliation: "1,2"
   - name: Ana Soldevilla
     orcid:
-    affiliation: "3,4"
+    affiliation: "3"
 affiliations:
  - name: Departamento de Física e Astronomia, Faculdade de Ciências, Universidade do Porto, Rua do Campo Alegre, 4169-007 Porto, Portugal
    index: 1
@@ -52,7 +52,7 @@ By combining instrument independent inputs, automatic adjustments and batch anal
 
 # State of the field   
 
-Some tools already exist to compute spectral indices, like ACTIN [@GomesdaSilva:2018,@GomesdaSilva:2021] and iSTARMOD [@Labarga:2025,@Labarga:2026]. 
+Some tools already exist to compute spectral indices, like ACTIN [@GomesdaSilva:2018, @GomesdaSilva:2021] and iSTARMOD [@Labarga:2025, @Labarga:2026]. 
 ACTIN computes the ratio between the flux inside a spectral line, delimited by a given central bandpass, and the flux in reference regions, usually the spectral continuum.
 iSTARMOD uses the spectral subtraction technique, which involves subtracting the total flux emitted along a line by its photospheric contribution, obtained via synthesis of a quiescent version of the spectrum from a reference star with the same properties (spectral type, RV and rotational velocity). The final activity index is the EW of the residual profile.
 
