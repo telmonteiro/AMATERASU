@@ -52,11 +52,11 @@ By combining instrument independent inputs, automatic adjustments and batch anal
 
 # State of the field   
 
-Some tools already exist to compute spectral indices, like ACTIN [@GomesdaSilva:2018, @GomesdaSilva:2021] and iSTARMOD [@Labarga:2025, @Labarga:2026]. 
+Some tools already exist to compute spectral indices, like ACTIN [@GomesdaSilva:2018;@GomesdaSilva:2021] and iSTARMOD [@Labarga:2025;@Labarga:2026]. 
 ACTIN computes the ratio between the flux inside a spectral line, delimited by a given central bandpass, and the flux in reference regions, usually the spectral continuum.
 iSTARMOD uses the spectral subtraction technique, which involves subtracting the total flux emitted along a line by its photospheric contribution, obtained via synthesis of a quiescent version of the spectrum from a reference star with the same properties (spectral type, RV and rotational velocity). The final activity index is the EW of the residual profile.
 
-While these tools are very useful for a variety of tasks, they only compute one version of a given activity index (with a fixed central bandpass), which may not be optimal to follow activity in different stars  [@GomesdaSilva:2022, Monteiro et al., in prep].
+While these tools are very useful for a variety of tasks, they only compute one version of a given activity index (with a fixed central bandpass), which may not be optimal to follow activity in different stars  [@GomesdaSilva:2022; Monteiro et al., in prep].
 Additionally, when testing a new index with ACTIN, the user needs to define the best reference regions, which is not straightforward when dealing with spectra affected by telluric lines (or their correction residuals) or lacking well defined continuum (often the case in M dwarves spectra). 
 
 Moreover, these tools do not provide a straightforward way to systematically test whether a given periodicity, such as a candidate planet signal, may be reproduced in activity indices.
