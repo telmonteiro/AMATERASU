@@ -28,7 +28,7 @@ affiliations:
    index: 2
  - name: Centro de Astrobiología (CAB), CSIC-INTA, Camino Bajo del Castillo s/n, 28692, Villanueva de la Cañada (Madrid), Spain
    index: 3
-date: 9 March 2026
+date: 11 March 2026
 bibliography: paper.bib
 
 ---
@@ -66,9 +66,11 @@ In practice, AMATERASU tests if a given period can be obtained by adjusting diff
 
 # Software design
 
-talk more about modularity of code
+AMATERASU was designed to have a modular architecture, allowing the user to easily access the different classes of the tool (e.g., cleaning data, running GLS periodograms). It also comes with several tunable parameters, giving the user full control, while keeping an easy "blind" implementation.
 
-AMATERASU computes the equivalent-width (EW) of a spectral line in a normalization independent way, by using the 80th percentile of the flux in a given window as the continuum level. It then computes the EW for an array of bandpasses, going from 0.1 \r{A} up to a user defined width.
+The basic input consists of 
+
+AMATERASU computes the pseudo equivalent-width (pEW) of a spectral line in a normalization independent way, by using a user-defined percentile of the flux in a given window as the continuum level. It then computes the pEW using bandpass grid that goes from 0.1 \r{A} up to a user-defined width.
 This way, the input includes the spectral line center, maximum bandpass width window and a window that includes both the line and some continuum flux. The flux is interpolated inside the window using the \texttt{specutils} package, with a step similar to the original spectrum's step, to align the spectrum portion with the bandpass edges. 
 
 The maximum bandpass and interpolation window can be given manually or automatically. In the automatic way, the spectra are coadded into a master spectrum, using the first spectrum as the common reference grid, which is then smoothed with a moving average. Then, the \texttt{find\_peaks} function from the \texttt{scipy} package is used to find the spectral lines and then retrieves the FWHM of the closest line to be studied (with a threshold of 0.1 \r{A}). The bandpass window is a multiple (rounded) of the FWHM retrieved (by default 5 times) and the interpolation window is 6 times that (30 times the FWHM). Having retrieved a time series of EWs measurements for a given bandpass, AMATERASU cleans the data by applying a 3-$\sigma$ sequential clipping and binning the data by night. 
@@ -98,11 +100,8 @@ The code is available and will be updated on [GitHub][] and can be easily instal
 
 # Research impact statement
 
-This tool could decrease false-positives arising from misidentified periodicities in RV and help improve planet search surveys. 
-
-something about helping RV surveys and stellar variability studies.
-
-already being used in on-going works (Monteiro et al., in prep; Soldevilla et al., in prep.)
+This tool could decrease false-positives arising from misidentified periodicities in RV and help improve both planet search surveys and our understanding of stellar variability. 
+AMATERASU is already being in research (Monteiro et al., in prep; Soldevilla et al., in prep).
 
 # AI usage disclosure
 
