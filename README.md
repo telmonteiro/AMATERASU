@@ -6,13 +6,13 @@ AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) i
 
 ## How does AMATERASU work?
 
-AMATERASU computes the equivalent width (EW) of a spectral line in a normalization independent way, by using the 80th percentile of the flux in a given window as an approximation of the continuum level. It computes the EW for an array of bandpasses, going from 0.1 \r{A} up to a user defined width.
+AMATERASU computes the equivalent width (EW) of a spectral line in a normalization independent way, by using the 80th percentile of the flux in a given window as an approximation of the continuum level. It computes the EW for an array of bandpasses, going from 0.1 Å up to a user defined width.
 
 This way, the input includes the spectral line center, bandpass width and a window that includes both the line and some continuum. 
 By default, the flux is interpolated inside the window, with a step similar to the original spectrum's step. 
 The maximum bandpass and the interpolation window can be given manually or automatically. 
-Automatically, the spectra are coadded and then the code uses the find_peaks function of scipy to find spectral lines in a given order and then retrieves the FWHM of the closest line to be studied (threshold of 0.1 \r{A}). 
-The bandpass window is a multiple (rounded) of the FWHM retrieved (by default 6 times) and the interpolation window is four times that (24 times the FWHM).
+Automatically, the spectra are coadded and then the code uses the find_peaks function of scipy to find spectral lines in a given order and then retrieves the FWHM of the closest line to be studied (threshold of 0.1 Å). 
+The bandpass window is a multiple (rounded) of the FWHM retrieved (by default 5 times) and the interpolation window is 6 times that (30 times the FWHM).
 
 Having retrieved a time series of EWs measurements for a given bandpass, AMATERASU cleans the data by sigma sequential clipping and binning the data by night. 
 
