@@ -22,7 +22,7 @@ The bandpass window is set as an integer multiple of the FWHM retrieved (by defa
 
 The user can choose one of the predefined lines in the ``ind_table.csv`` table or test a new index. 
 The tool accepts a list of input periods and a list of lines to analyse, as well as 1D or 2D spectra. 
-To be more flexible with the instruments tested, the spectra have to be given in an array format: for 2D spectra, the array should have dimensions of ($N_\text{obs}$,$N_\text{spectrum axis}$,$N_\text{orders}$,$N_\text{pixels}$), where $N_\text{spectrum axis}$ refers for the wavelength, flux and flux error of each spectrum. An array with the dates of observations in BJD is also needed.
+To be more flexible with the instruments tested, the spectra have to be given in an array format: for 2D spectra, the array should have dimensions of ($N_\text{obs}$, $N_\text{spectrum axis}$, $N_\text{orders}$, $N_\text{pixels}$), where $N_\text{spectrum axis}$ refers for the wavelength, flux and flux error of each spectrum. An array with the dates of observations in BJD is also needed.
 
 AMATERASU has two output modes: "standard" and "full". The standard output is the fastest, as it only computes the pEW time-series and correspondent GLS periodograms, prints wether any of the periods is close to the input one and saves (if wanted) a .csv file with the matching periods and respective central bandpasses and a .csv file with the Spearman correlations with the input array per bandpass (if wanted). 
 The full output allows to save all analysis data in a directory, including:
