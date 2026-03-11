@@ -2,33 +2,51 @@
 
 ## What is AMATERASU?
 
-AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a simple Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a spectral line, the user can see if the input period may be correlated with activity.
+AMATERASU (AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling) is a simple Python tool to check for periods in spectral activity indices similar to an input period. This way, by running AMATERASU for a spectral line, the user can see if the input period may be related to stellar activity.
 
 ## How does AMATERASU work?
 
-AMATERASU computes the equivalent width (EW) of a spectral line in a normalization independent way, by using the 80th percentile of the flux in a given window as an approximation of the continuum level. It computes the EW for an array of bandpasses, going from 0.1 Å up to a user defined width.
+AMATERASU was designed to have a modular architecture, allowing the user to easily access the different classes of the tool (e.g., cleaning data, running GLS periodograms). It also comes with several tunable parameters, giving the user full control, while keeping an easy "blind" implementation.
 
-This way, the input includes the spectral line center, bandpass width and a window that includes both the line and some continuum. 
-By default, the flux is interpolated inside the window, with a step similar to the original spectrum's step. 
-The maximum bandpass and the interpolation window can be given manually or automatically. 
-Automatically, the spectra are coadded and then the code uses the find_peaks function of scipy to find spectral lines in a given order and then retrieves the FWHM of the closest line to be studied (threshold of 0.1 Å). 
-The bandpass window is a multiple (rounded) of the FWHM retrieved (by default 5 times) and the interpolation window is 6 times that (30 times the FWHM).
+AMATERASU computes the pseudo equivalent-width (pEW) of a spectral line in a normalization independent way, using bandpasses from a grid that goes from 0.1 Å up to a user-defined maximum. 
+When computing the pEW, the flux is interpolated with a step similar to original spectrum's step, aligning the spectrum portion with the bandpass edges, and the continuum level is approximated as a user-defined percentile of the flux around the spectral line.
+Having retrieved a time series of pEWs measurements for a given bandpass, by default AMATERASU cleans the data by applying a 3-$\sigma$ sequential clipping and binning the data by night. 
+Then, AMATERASU runs Generalized Lomb-Scargle (GLS) periodograms [@Zechmeister:2009] and extracts the significant peaks, the ones not close to peaks in the window function periodogram and with a false alarm probability (FAP) under the specified threshold. If any of the significant peaks is close within the specified threshold to the input period, the tool warns the user.
+AMATERASU can also compute the Spearman correlation ranked coefficient and associated p-value between the pEW arrays and an input array, that can be, for example, a known activity indicator.
 
-Having retrieved a time series of EWs measurements for a given bandpass, AMATERASU cleans the data by sigma sequential clipping and binning the data by night. 
+The basic input consists of a spectral data cube (time-series of 1D or 2D spectra), various analysis options and information on the spectral line (line center, maximum central bandpass window and continuum window).
+The maximum central bandpass and continuum windows can be given either manually or computed automatically. 
+In the automatic way, the spectra are coadded into a master spectrum, using the first spectrum as the common reference grid, which is then smoothed with a moving average. 
+Then, the \texttt{find\_peaks} function from the \texttt{scipy} package [@Scipy2020] is used to find the target spectral line and retrieve its full-width-at-half-maximum (FWHM). 
+The bandpass window is set as an integer multiple of the FWHM retrieved (by default 5 times) and the continuum window is 6 times that (30 times the FWHM). 
 
-Finally, AMATERASU runs GLS periodograms (with several technicalities) and if the significant peak with most power is similar to the tested/input period, the program warns the user.
+The user can choose one of the predefined lines in the ``ind_table.csv`` table or test a new index. 
+The tool accepts a list of input periods and a list of lines to analyse, as well as 1D or 2D spectra. 
+To be more flexible with the instruments tested, the spectra have to be given in an array format: for 2D spectra, the array should have dimensions of ($N_\text{obs}$,$N_\text{spectrum axis}$,$N_\text{orders}$,$N_\text{pixels}$), where $N_\text{spectrum axis}$ refers for the wavelength, flux and flux error of each spectrum. An array with the dates of observations in BJD is also needed.
 
-The user can choose one of the predefined indices in the ``ind_table.csv`` table or define a new indice.
+AMATERASU has two output modes: "standard" and "full". The standard output is the fastest, as it only computes the pEW time-series and correspondent GLS periodograms, prints wether any of the periods is close to the input one and saves (if wanted) a \texttt{.csv} file with the matching periods and respective central bandpasses and a \texttt{.csv} file with the Spearman correlations with the input array per bandpass (if wanted). 
+The full output allows to save all analysis data in a directory, including:
 
-- Accepts a list of input periods and a list of lines to analyse.
-- Accepts both 1D and 2D spectra.
+- table with the pEW values and errors for each central bandpass, as well as the BJD time
+- table with the periods matching input
+- table with all significant periods found
+- table with all the periodogram information
+- table with the Spearman correlations per central bandpass with input array
+- plot of time-series of each pEW computed and corresponding GLS periodogram
+- separate periodogram and WF periodogram plots for each pEW (for debugging purposes)
 
-Besides the GLSPs, AMATERASU can compute the Spearman ranked correlation coefficient of all the time-series with an input array, that can be a known activity index (e.g. CCF FWHM). It then prints the bandpass that maximizes the absolute correlation.
+AMATERASU is completely instrument agnostic, but we mostly used NIRPS data when building the tool, so the predefined indices available are NIR spectral lines.
+Nevertheless, the tool has been proven to work with optical HARPS spectra (Soldevilla et al., in prep). 
+Additionally, AMATERASU's automatic window definition only works for symmetrical absorption lines, often failing for lines with core emission, resolved Zeeman splitting or with line blends. In those cases, the user can still use AMATERASU with user-defined windows.
 
-Output options:
-- Standard: warns if some input period was detect, in which line and with which FAP. Prints and saves a dataframe.
-- Full: saves all analysis data in a directory.
+## Installation and Running
 
-To run AMATERASU, make sure to have the packages needed downloaded. The Python version used to build AMATERASU was 3.10.19, ran inside WSL Ubuntu with VSCode.
+To run AMATERASU, make sure to have the packages needed installed. The Python version used to build AMATERASU was 3.10.19, ran inside WSL Ubuntu with VSCode.
 
-A tutorial notebook is also provided, as well as a sample of observations.
+To install run:
+
+git clone https://github.com/telmonteiro/AMATERASU
+cd AMATERASU
+pip install -e .
+
+A tutorial notebook is also provided, as well as a sample of Proxima Centauri observations taken with the NIRPS spectrograph.
