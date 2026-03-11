@@ -1,4 +1,4 @@
-# AMATERASU - AutoMATic Equivalent-width Retrieval for Activity Signal Unveiling
+# AMATERASU
 
 ## What is AMATERASU?
 
