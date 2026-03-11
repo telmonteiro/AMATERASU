@@ -39,7 +39,7 @@ class AMATERASU:
     fixed_bandpass : float, optional
         Central bandpass if user wants to test one specific bandpass.
     percentile_cont : float, optional
-        Percentile for continuum estimation (default: 80).
+        Percentile for continuum estimation (default: 75).
     automatic_windows_mult : list, optional
         List with multipliers for automatic window calculation, first element for line window and second for interpolation 
         window (default: [5,6]).
@@ -61,7 +61,7 @@ class AMATERASU:
     plot_gls_and_correlations(index, plot, folder_path, gls_plot_type="highest peak", gls_y_lims=[75,85])
         Plots the main peak of GLS periodograms and Spearman correlations in function of central bandpasses for a given index.
     """
-    def __init__(self, star:str, data:list, indices:list, indices_info:dict, fixed_bandpass:float=None, percentile_cont:float=80, automatic_windows_mult:list=[5,6]):
+    def __init__(self, star:str, data:list, indices:list, indices_info:dict, fixed_bandpass:float=None, percentile_cont:float=75, automatic_windows_mult:list=[5,6]):
 
         print(f"AMATERASU instance created for {star}")
 
@@ -351,7 +351,9 @@ class AMATERASU:
         wave = spectrum[0]
         flux = spectrum[1]
 
-        mask_c = (wave >= self.ln_ctr - self.interp_win/2) & (wave <= self.ln_ctr + self.interp_win/2)
+        mask_c = ((wave >= self.ln_ctr - self.interp_win/2) &
+                (wave <= self.ln_ctr + self.interp_win/2) &
+                ((wave < self.ln_ctr - self.ln_win/2) | (wave > self.ln_ctr + self.ln_win/2)))
 
         flux_float_c = np.array(flux, dtype=float)[mask_c]
         flux_float_c = flux_float_c[(np.isnan(flux_float_c)==False)]

@@ -49,7 +49,7 @@ class SpectraTreat:
     plot_complete(star, index, wave_coadd, flux_coadd, peaks_indices, wave_c, flux_c, ln_ctr, ln_fwhm, ln_ctr_new, ctr_flux, interp_win, ln_win, folder)
         Complete plot coadded and smoothed spectral line with detected peaks and defined windows.
     """
-    def __init__(self, spectra_observations:np.ndarray, index:str, index_info:dict, percentile_cont:float=80, automatic_windows_mult:list=[5,6], plot_line:str="simple", folder:str=None, star:str=None):
+    def __init__(self, spectra_observations:np.ndarray, index:str, index_info:dict, percentile_cont:float=75, automatic_windows_mult:list=[5,6], plot_line:str="simple", folder:str=None, star:str=None):
         
         ln_ctr = index_info["ln_ctr"]
 
@@ -98,7 +98,7 @@ class SpectraTreat:
             inverted_flux = -flux_coadd
 
             # find peaks in the inverted flux
-            peaks_indices = find_peaks(inverted_flux, width=1)[0]
+            peaks_indices = find_peaks(inverted_flux)[0]
             # measure widths at half maximum for all peaks
             widths_indices = peak_widths(inverted_flux, peaks_indices, rel_height=0.5)[0]
 
@@ -123,15 +123,21 @@ class SpectraTreat:
             ln_win = np.around(automatic_windows_mult[0] * ln_fwhm, 1)
             interp_win = np.around(automatic_windows_mult[1] * ln_win, 1)
 
-            mask_interp = (wave_coadd >= ln_ctr - interp_win/2) & (wave_coadd <= ln_ctr + interp_win/2)
-            flux_c = np.array(flux_coadd, dtype=float)[mask_interp] 
+            mask_interp = (wave_coadd >= ln_ctr - interp_win/2) & (wave_coadd <= ln_ctr + interp_win/2) 
+
+            flux_interp = np.array(flux_coadd, dtype=float)[mask_interp]
+            wave_interp = np.array(wave_coadd, dtype=float)[mask_interp]
+     
+            mask_cont = mask_interp & ((wave_coadd < ln_ctr - ln_win/2) | (wave_coadd > ln_ctr + ln_win/2)) 
+                    
+            flux_c = np.array(flux_coadd, dtype=float)[mask_cont] 
             flux_c = flux_c[~np.isnan(flux_c)] # remove NaNs
-            wave_c = np.array(wave_coadd, dtype=float)[mask_interp]
+            cont_level = np.percentile(flux_c, percentile_cont)
 
             if plot_line == "simple":
-                self.plot_simple(index, wave_c, flux_c, ln_ctr, ln_win, percentile_cont)
+                self.plot_simple(index, wave_interp, flux_interp, cont_level, ln_ctr, ln_win, percentile_cont)
             elif plot_line == "complete":
-                self.plot_complete(star, index, wave_coadd, flux_coadd, peaks_indices, wave_c, flux_c, ln_ctr, ln_fwhm, ln_ctr_new, ctr_flux, interp_win, ln_win, folder)
+                self.plot_complete(star, index, wave_coadd, flux_coadd, peaks_indices, wave_interp, flux_interp, cont_level, ln_ctr, ln_fwhm, ln_ctr_new, ctr_flux, interp_win, ln_win, folder)
             
         results = {"ln_ctr": ln_ctr, "ln_win": ln_win, "interp_win": interp_win, "spectra_obs": spectra_obs}
 
@@ -230,17 +236,19 @@ class SpectraTreat:
         return wave_coadd, flux_coadd
 
 
-    def plot_simple(self, index:str, wave_c:np.ndarray, flux_c:np.ndarray, ln_ctr:float, ln_win:float, percentile_cont:float):
+    def plot_simple(self, index:str, wave_interp:np.ndarray, flux_interp:np.ndarray, cont_level:float, ln_ctr:float, ln_win:float, percentile_cont:float):
         """Simple plot coadded and smoothed spectral line.
         
         Parameters
         ----------
         index : str
             identifier of index / spectral line.
-        wave_c : numpy array
+        wave_interp : numpy array
             wavelength grid of the coadded spectrum.
-        flux_c : numpy array
+        flux_interp : numpy array
             flux values of the coadded spectrum.
+        cont_level : float
+            continuum level.
         ln_ctr : float
             line center in wavelength units.
         ln_win : float
@@ -254,17 +262,17 @@ class SpectraTreat:
         plt.xlabel(r"$\lambda$ [Å]")
         plt.ylabel("Flux")
 
-        plt.plot(wave_c, flux_c, color="black", label="Coadded spectrum")
+        plt.plot(wave_interp, flux_interp, color="black", label="Coadded spectrum")
         plt.axvspan(ln_ctr - ln_win / 2, ln_ctr + ln_win / 2, alpha=0.1, color='yellow', ec = "black", lw = 2)
 
-        plt.axhline(np.percentile(flux_c, percentile_cont), color='red', linestyle='--', linewidth=1, label=f'{percentile_cont}th percentile')
+        plt.axhline(cont_level, color='red', linestyle='--', linewidth=1, label=f'{percentile_cont}th percentile')
 
         plt.legend()
         plt.show()
         gc.collect()
 
 
-    def plot_complete(self, star:str, index:str, wave_coadd:np.ndarray, flux_coadd:np.ndarray, peaks_indices:np.ndarray, wave_c:np.ndarray, flux_c:np.ndarray, ln_ctr:float, ln_fwhm:float, ln_ctr_new:float, ctr_flux:float, interp_win:float, ln_win:float, folder:str):
+    def plot_complete(self, star:str, index:str, wave_coadd:np.ndarray, flux_coadd:np.ndarray, peaks_indices:np.ndarray, wave_interp:np.ndarray, flux_interp:np.ndarray, cont_level:float, ln_ctr:float, ln_fwhm:float, ln_ctr_new:float, ctr_flux:float, interp_win:float, ln_win:float, folder:str):
         """Complete plot coadded and smoothed spectral line with detected peaks and defined windows.
         
         Parameters
@@ -279,10 +287,12 @@ class SpectraTreat:
             flux values of the coadded spectrum.
         peaks_indices : numpy array
             indices of the detected peaks in the coadded spectrum.
-        wave_c : numpy array
+        wave_interp : numpy array
             wavelength grid of the coadded spectrum in the interpolation window.
-        flux_c : numpy array
+        flux_interp : numpy array
             flux values of the coadded spectrum in the interpolation window.
+        cont_level : float
+            continuum level.
         ln_ctr : float
             line center in wavelength units.
         ln_fwhm : float
@@ -321,13 +331,13 @@ class SpectraTreat:
         axes[0].margins(x=0)
         axes[0].legend()
 
-        axes[1].plot(wave_c, flux_c, color="black")
+        axes[1].plot(wave_interp, flux_interp, color="black")
         axes[1].plot(ln_ctr_new, ctr_flux, "x", color="red", label='Target spectral line')
 
         axes[1].axvline(ln_ctr_new-ln_win/2,lw=1,ls="--")
         axes[1].axvline(ln_ctr_new+ln_win/2,lw=1,ls="--")
 
-        axes[1].axhline(np.percentile(flux_c, 80), ls="--", color="red", label="Pseudo-continuum")
+        axes[1].axhline(cont_level, ls="--", color="red", label="Pseudo-continuum")
         
         axes[1].set_xlabel(f"Wavelength $\lambda$ [$\AA$]", fontsize=12)
         axes[1].set_ylabel(r"Flux [e$^-$]", fontsize=12)

@@ -350,7 +350,7 @@ class gls_periodogram:
             ax[1].text(0.05, 0.9, f"P = {np.around(results['period_best'], 1)} d \nFAP = {results['fap_best']*100:.2e}%", fontsize=12, transform=ax[1].transAxes, verticalalignment="top")
 
         fig.subplots_adjust(hspace=0.0)
-        fig.text(0.13, 0.890-0.00018*nrows, f"{star} - {index}", fontsize=17)
+        fig.text(0.13, 0.890-0.00016*nrows, f"{star} - {index}", fontsize=17)
 
         if folder is not None:
             plt.savefig(folder+f"{star}_{index}_GLS.pdf", dpi=300, bbox_inches="tight")
