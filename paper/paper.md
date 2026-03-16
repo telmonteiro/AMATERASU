@@ -106,7 +106,7 @@ The code is available and will be regularly updated on [GitHub][] and can be eas
 # Research impact statement
 
 This tool could decrease false-positives arising from misidentified periodicities in RV and help improve both planet search surveys and our understanding of stellar variability. 
-AMATERASU is already being in research (Monteiro et al., in prep; Soldevilla et al., in prep).
+AMATERASU is already being used in research (Monteiro et al., in prep; Soldevilla et al., in prep).
 
 # AI usage disclosure
 
