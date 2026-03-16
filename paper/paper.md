@@ -72,7 +72,7 @@ AMATERASU computes the pseudo equivalent-width (pEW) of a spectral line in a nor
 When computing the pEW, the flux is interpolated with a step similar to original spectrum's step, aligning the spectrum portion with the bandpass edges, and the continuum level is approximated as a user-defined percentile of the flux around the spectral line.
 Having retrieved a time series of pEWs measurements for a given bandpass, by default AMATERASU cleans the data by applying a 3-$\sigma$ sequential clipping and binning the data by night. 
 Then, AMATERASU runs Generalized Lomb-Scargle (GLS) periodograms [@Zechmeister:2009] and extracts the significant peaks, the ones not close to peaks in the window function periodogram and with a false alarm probability (FAP) under the specified threshold. If any of the significant peaks is close within the specified threshold to the input period, the tool warns the user.
-AMATERASU can also compute the Spearman correlation ranked coefficient and associated p-value between the pEW arrays and an input array, that can be, for example, a known activity indicator.
+AMATERASU can also compute the Spearman correlation ranked coefficient and associated p-value between the pEW arrays and an input array, that can be, for example, a known activity indicator or the RV timeseries.
 
 The basic input consists of a spectral data cube (time-series of 1D or 2D spectra), various analysis options and information on the spectral line (line center, maximum central bandpass window and continuum window).
 The maximum central bandpass and continuum windows can be given either manually or computed automatically. 
