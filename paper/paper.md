@@ -8,7 +8,7 @@ tags:
 authors:
   - name: Telmo Monteiro
     orcid: 0000-0001-8991-4615
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
+    affiliation: "1, 2" 
   - name: João Gomes da Silva
     orcid: 0000-0001-8056-9202
     affiliation: "2"
