@@ -45,8 +45,11 @@ To run AMATERASU, make sure to have the packages needed installed. The Python ve
 
 To install run:
 
+`` 
 git clone https://github.com/telmonteiro/AMATERASU
-cd AMATERASU
-pip install -e .
 
+cd AMATERASU
+
+pip install -e .
+``
 A tutorial notebook is also provided, as well as a sample of Proxima Centauri observations taken with the NIRPS spectrograph.
